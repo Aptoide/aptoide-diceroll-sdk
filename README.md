@@ -1,0 +1,1 @@
+# aptoide-diceroll-sdk
