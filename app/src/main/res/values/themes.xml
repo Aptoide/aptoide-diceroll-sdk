@@ -1,0 +1,10 @@
+<resources>
+
+    <style name="DiceRoll.Theme" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="DiceRoll.Splash" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_diceroll_splash</item>
+        <item name="windowSplashScreenBackground">@color/blue_background</item>
+        <item name="postSplashScreenTheme">@style/DiceRoll.Theme</item>
+    </style>
+</resources>
