@@ -21,7 +21,7 @@ This sample app is used to show the integration via [Aptoide Billing SDK](https:
 ## 🚀 How to run it
 
 Dev and Prod variants are available which can be chosen via BuildVariants and run on Android Studio.
-To correctly test the Application, update the [PUBLIC_KEY](https://github.com/Aptoide/aptoide-diceroll-android-sdk/blob/master/gradle.properties#L28-L29) with the Sample key on [SDK Documentation](https://docs.catappult.io/docs/native-android-billing-sdk#faq).
+To correctly test the Application, update the [PUBLIC_KEY](https://github.com/Aptoide/aptoide-diceroll-sdk/blob/master/gradle.properties#L28-L29) with the Sample key on [SDK Documentation](https://docs.catappult.io/docs/native-android-billing-sdk#faq).
 
 ## 🛠 Tech Notes
 
