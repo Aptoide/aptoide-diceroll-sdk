@@ -15,13 +15,8 @@ internal fun Project.configureAndroidCompose(
       compose = true
     }
 
-    composeOptions {
-      kotlinCompilerExtensionVersion = version("androidx-compose-compiler")
-    }
-
     dependencies {
       implementation("androidx-compose-runtime")
-      implementation("androidx-compose-compiler")
       implementation("androidx-compose-foundation")
       implementation("androidx-compose-accompanist-systemuicontroller")
       implementation("androidx-compose-accompanist-navigation-material")

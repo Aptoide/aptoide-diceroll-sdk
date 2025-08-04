@@ -69,9 +69,6 @@ class AndroidAppPlugin : Plugin<Project> {
 
         buildFeatures {
           buildConfig = true
-          composeOptions {
-            kotlinCompilerExtensionVersion = version("androidx-compose-compiler")
-          }
           compose = true
         }
       }

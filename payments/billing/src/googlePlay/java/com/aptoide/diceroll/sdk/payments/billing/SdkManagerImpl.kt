@@ -3,6 +3,7 @@ package com.aptoide.diceroll.sdk.payments.billing
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
 import com.android.billingclient.api.BillingClient
+import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.aptoide.diceroll.sdk.core.network.clients.rtdn.RTDNWebSocketClient
@@ -69,7 +70,12 @@ class SdkManagerImpl @Inject constructor(
     override fun setupSdkConnection(context: Context) {
         billingClient = BillingClient.newBuilder(context)
             .setListener(purchasesUpdatedListener)
-            .enablePendingPurchases()
+            .enablePendingPurchases(
+                PendingPurchasesParams.newBuilder()
+                    .enableOneTimeProducts()
+                    .enablePrepaidPlans()
+                    .build()
+            )
             .build()
         billingClient.startConnection(billingClientStateListener)
     }
