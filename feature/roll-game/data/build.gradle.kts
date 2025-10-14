@@ -6,6 +6,11 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.feature.roll_game.data"
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {

@@ -19,6 +19,11 @@ android {
       "\"${libs.android.aptoide.billing.get().version}\""
     )
   }
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {

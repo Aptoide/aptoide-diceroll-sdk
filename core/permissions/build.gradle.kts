@@ -8,4 +8,9 @@ android {
   buildFeatures {
     buildConfig = true
   }
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }

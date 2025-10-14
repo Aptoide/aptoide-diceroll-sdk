@@ -13,6 +13,11 @@ android {
     versionName = "1.0.0"
     multiDexEnabled = true
   }
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {
