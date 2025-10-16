@@ -9,7 +9,7 @@ android {
   namespace = "com.aptoide.diceroll.sdk"
   defaultConfig {
     applicationId = "com.aptoide.diceroll.sdk"
-    versionCode = 1
+    versionCode = 1000
     versionName = "1.0.0"
     multiDexEnabled = true
   }
