@@ -4,6 +4,11 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.core.datastore"
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {
