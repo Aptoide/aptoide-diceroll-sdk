@@ -38,4 +38,5 @@ dependencies {
   implementation(libs.androidx.splashscreen)
   implementation(libs.bundles.androidx.compose)
   implementation(libs.bundles.androidx.compose.accompanist)
+  implementation(libs.appsflyer.sdk)
 }
