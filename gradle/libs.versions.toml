@@ -13,7 +13,6 @@ androidx_lifecycle_compose_version = "2.6.0"
 androidx_navigation_version = "2.7.2"
 androidx_preference_version = "1.2.0"
 androidx_room_version = "2.6.0-beta01"
-androidx_security_crypto = "1.1.0-alpha06"
 androidx_splashscreen = "1.0.1"
 appsflyer_version = "6.17.5"
 build_tools_version = "30.0.3"
@@ -52,7 +51,6 @@ mockk_version = "1.13.3"
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "corektx_version" }
 androidx-appcompact = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat_version" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx_datastore" }
-androidx-security-crypto = { module = "androidx.security:security-crypto", version.ref = "androidx_security_crypto" }
 androidx-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "androidx_splashscreen" }
 
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "androidx_room_version" }
