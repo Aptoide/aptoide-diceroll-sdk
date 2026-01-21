@@ -16,6 +16,5 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.security.crypto)
     implementation(libs.appsflyer.sdk)
 }

@@ -14,12 +14,6 @@ object AnalyticsModule {
 
     @Provides
     @Singleton
-    fun provideUserIdManager(@ApplicationContext context: Context): UserIdManager {
-        return UserIdManager(context)
-    }
-
-    @Provides
-    @Singleton
     fun provideAnalyticsManager(
         @ApplicationContext context: Context
     ): AnalyticsManager {
