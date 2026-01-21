@@ -1,17 +1,11 @@
-package com.aptoide.diceroll.sdk.core.utils
+package com.aptoide.diceroll.sdk.core.analytics
 
 import android.content.Context
 import com.appsflyer.AFInAppEventParameterName
 import com.appsflyer.AFInAppEventType
 import com.appsflyer.AppsFlyerLib
 
-class AnalyticsManager(private val context: Context, private val userIdManager: UserIdManager) {
-
-    fun logStartEvent() {
-        val eventValues = mutableMapOf<String, Any>()
-        eventValues["user_id"] = userIdManager.getUserId()
-        AppsFlyerLib.getInstance().logEvent(context, "START", eventValues)
-    }
+class AnalyticsManager(private val context: Context) {
 
     fun logPurchaseEvent(
         revenue: Double,

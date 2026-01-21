@@ -21,6 +21,7 @@ android {
 }
 
 dependencies {
+  projectImplementation(":core:analytics")
   projectImplementation(":core:ui:design")
   projectImplementation(":core:ui:widgets")
   projectImplementation(":core:utils")

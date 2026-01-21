@@ -1,4 +1,4 @@
-package com.aptoide.diceroll.sdk.core.utils
+package com.aptoide.diceroll.sdk.core.analytics
 
 import android.content.Context
 import dagger.Module
@@ -21,9 +21,8 @@ object AnalyticsModule {
     @Provides
     @Singleton
     fun provideAnalyticsManager(
-        @ApplicationContext context: Context,
-        userIdManager: UserIdManager
+        @ApplicationContext context: Context
     ): AnalyticsManager {
-        return AnalyticsManager(context, userIdManager)
+        return AnalyticsManager(context)
     }
 }

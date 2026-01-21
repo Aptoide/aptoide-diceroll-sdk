@@ -1,15 +1,18 @@
-package com.aptoide.diceroll.sdk.core.utils
+package com.aptoide.diceroll.sdk.core.analytics
 
 import android.content.Context
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKeys
-import java.util.UUID
+import android.util.Log
 import androidx.core.content.edit
+import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import java.util.UUID
 
 class UserIdManager(context: Context) {
 
-    private val masterKeyAlias = MasterKey.Builder(context).build()
+    private val masterKeyAlias =
+        MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
 
     private val sharedPreferences = EncryptedSharedPreferences.create(
         context,
@@ -23,7 +26,10 @@ class UserIdManager(context: Context) {
         var userId = sharedPreferences.getString(USER_ID_KEY, null)
         if (userId == null) {
             userId = UUID.randomUUID().toString()
+            Log.e("USERID", "getUserId: first UUID generated: $userId")
             sharedPreferences.edit { putString(USER_ID_KEY, userId) }
+        } else {
+            Log.e("USERID", "getUserId: saved UUID: $userId")
         }
         return userId
     }

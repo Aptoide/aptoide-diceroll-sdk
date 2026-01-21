@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-  namespace = "com.aptoide.diceroll.sdk.core.utils"
+  namespace = "com.aptoide.diceroll.sdk.core.analytics"
   buildFeatures {
     buildConfig = true
   }
@@ -13,4 +13,9 @@ android {
       useLegacyPackaging = true
     }
   }
+}
+
+dependencies {
+    implementation(libs.androidx.security.crypto)
+    implementation(libs.appsflyer.sdk)
 }

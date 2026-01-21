@@ -8,7 +8,7 @@ import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.aptoide.diceroll.sdk.core.network.clients.rtdn.RTDNWebSocketClient
 import com.aptoide.diceroll.sdk.core.ui.notifications.NotificationHandler
-import com.aptoide.diceroll.sdk.core.utils.AnalyticsManager
+import com.aptoide.diceroll.sdk.core.analytics.AnalyticsManager
 import com.aptoide.diceroll.sdk.payments.billing.respository.PurchaseValidatorRepository
 import com.aptoide.diceroll.sdk.payments.data.PaymentsResultManager
 import com.aptoide.diceroll.sdk.payments.data.models.InternalPurchase
