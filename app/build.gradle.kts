@@ -13,6 +13,26 @@ android {
     versionName = "1.0.0"
     multiDexEnabled = true
   }
+    buildTypes {
+        debug {
+            buildConfigField(
+                "String",
+                "APPSFLYER_API_KEY",
+                project.property("APPSFLYER_API_KEY").toString()
+            )
+
+        }
+        release {
+            buildConfigField(
+                "String",
+                "APPSFLYER_API_KEY",
+                project.property("APPSFLYER_API_KEY").toString()
+            )
+        }
+    }
+    buildFeatures {
+        buildConfig = true
+    }
   packaging {
     jniLibs {
       useLegacyPackaging = true
