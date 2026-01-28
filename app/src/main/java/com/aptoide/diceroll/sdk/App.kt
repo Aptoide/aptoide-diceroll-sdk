@@ -24,8 +24,7 @@ class App : Application() {
     }
 
     private fun initiateAppsFlyerSDK() {
-        // TODO: Replace "YOUR_APPSFLYER_DEV_KEY" with your actual dev key
-        AppsFlyerLib.getInstance().init("YOUR_APPSFLYER_DEV_KEY", null, applicationContext)
+        AppsFlyerLib.getInstance().init(BuildConfig.APPSFLYER_API_KEY, null, applicationContext)
         AppsFlyerLib.getInstance().waitForCustomerUserId(true)
         AppsFlyerLib.getInstance().start(this)
         val userId = getUserUseCase().uuid
