@@ -9,6 +9,11 @@ android {
         debug {
             buildConfigField(
                 "String",
+                "ADJUST_APP_TOKEN",
+                project.property("ADJUST_APP_TOKEN").toString()
+            )
+            buildConfigField(
+                "String",
                 "APPSFLYER_API_KEY",
                 project.property("APPSFLYER_API_KEY").toString()
             )
@@ -16,11 +21,21 @@ android {
                 "String",
                 "KOCHAVA_APP_GUID",
                 project.property("KOCHAVA_APP_GUID").toString()
+            )
+            buildConfigField(
+                "String",
+                "ADJUST_APP_TOKEN",
+                project.property("ADJUST_APP_TOKEN").toString()
             )
         }
         release {
             buildConfigField(
                 "String",
+                "ADJUST_APP_TOKEN",
+                project.property("ADJUST_APP_TOKEN").toString()
+            )
+            buildConfigField(
+                "String",
                 "APPSFLYER_API_KEY",
                 project.property("APPSFLYER_API_KEY").toString()
             )
@@ -28,6 +43,11 @@ android {
                 "String",
                 "KOCHAVA_APP_GUID",
                 project.property("KOCHAVA_APP_GUID").toString()
+            )
+            buildConfigField(
+                "String",
+                "ADJUST_APP_TOKEN",
+                project.property("ADJUST_APP_TOKEN").toString()
             )
         }
     }
@@ -42,6 +62,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.adjust)
     implementation(libs.appsflyer.sdk)
     implementation(libs.kochava.tracker)
     implementation(libs.kochava.events)

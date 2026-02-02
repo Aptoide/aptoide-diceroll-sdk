@@ -1,4 +1,5 @@
 [versions]
+adjust_version = "5.5.0"
 androidx_activity = "1.7.2"
 androidx_appcompat_version = "1.6.1"
 androidx_compose = "1.5.0"
@@ -49,6 +50,8 @@ viewBindingDelegate = "1.4.7"
 mockk_version = "1.13.3"
 
 [libraries]
+adjust = { module = "com.adjust.sdk:adjust-android", version.ref = "adjust_version" }
+
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "corektx_version" }
 androidx-appcompact = { module = "androidx.appcompat:appcompat", version.ref = "androidx_appcompat_version" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx_datastore" }
