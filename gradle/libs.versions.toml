@@ -14,9 +14,10 @@ androidx_navigation_version = "2.7.2"
 androidx_preference_version = "1.2.0"
 androidx_room_version = "2.6.0-beta01"
 androidx_splashscreen = "1.0.1"
+appsflyer_version = "6.17.5"
 build_tools_version = "30.0.3"
-aptoide_billing_version = "1.1.0"
-#aptoide_billing_version = "1.1.0.dev-SNAPSHOT"
+aptoide_billing_version = "1.2.1"
+#aptoide_billing_version = "1.2.1.dev-SNAPSHOT"
 coil_version = "2.3.0"
 corektx_version = "1.12.0"
 coroutines_version = "1.7.2"
@@ -80,6 +81,8 @@ androidx-compose-ui-util = { module = "androidx.compose.ui:ui-util" }
 androidx-compose-ui-viewbinding = { module = "androidx.compose.ui:ui-viewbinding", version.ref = "androidx_compose" }
 androidx-compose-activity = { module = "androidx.activity:activity-compose", version.ref = "androidx_activity" }
 
+appsflyer-sdk = { module = "com.appsflyer:af-android-sdk", version.ref = "appsflyer_version" }
+
 network-retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
 network-retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit_version" }
 network-okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp_version" }
@@ -137,4 +140,3 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin_version" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp_version" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin_version" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin_version" }
-

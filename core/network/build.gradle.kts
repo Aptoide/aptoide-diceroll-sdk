@@ -6,6 +6,11 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.core.network"
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {

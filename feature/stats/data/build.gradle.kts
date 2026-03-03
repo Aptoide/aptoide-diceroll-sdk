@@ -6,6 +6,11 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.feature.stats.data"
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {

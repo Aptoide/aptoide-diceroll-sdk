@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-  namespace = "com.aptoide.diceroll.sdk.core.permissions"
+  namespace = "com.aptoide.diceroll.sdk.core.analytics"
   buildFeatures {
     buildConfig = true
   }
@@ -13,4 +13,8 @@ android {
       useLegacyPackaging = true
     }
   }
+}
+
+dependencies {
+    implementation(libs.appsflyer.sdk)
 }

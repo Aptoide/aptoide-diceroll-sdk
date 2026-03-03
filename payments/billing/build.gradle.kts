@@ -26,9 +26,15 @@ android {
   buildFeatures {
     buildConfig = true
   }
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {
+  projectImplementation(":core:analytics")
   projectImplementation(":core:network")
   projectImplementation(":core:ui:notifications")
   projectImplementation(":core:utils")

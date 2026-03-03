@@ -7,6 +7,11 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.core.navigation"
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {

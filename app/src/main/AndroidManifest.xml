@@ -16,6 +16,8 @@
         android:theme="@style/DiceRoll.Splash"
         tools:targetApi="33">
 
+        <meta-data android:name="CHANNEL" android:value="Aptoide"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

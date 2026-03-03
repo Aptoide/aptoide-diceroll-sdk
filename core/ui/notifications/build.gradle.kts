@@ -5,6 +5,11 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.core.ui.notifications"
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {

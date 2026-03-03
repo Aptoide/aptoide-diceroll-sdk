@@ -6,6 +6,11 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.payments.data"
+  packaging {
+    jniLibs {
+      useLegacyPackaging = true
+    }
+  }
 }
 
 dependencies {

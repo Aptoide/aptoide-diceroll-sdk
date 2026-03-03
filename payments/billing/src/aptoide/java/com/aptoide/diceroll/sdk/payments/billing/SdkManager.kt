@@ -157,6 +157,7 @@ interface SdkManager {
                                     "\nsku: ${purchase.products.first()}" +
                                     "\npackageName: ${purchase.packageName}" +
                                     "\ndeveloperPayload: ${purchase.developerPayload}" +
+                                    "\nobfuscatedAccountId: ${purchase.accountIdentifiers?.obfuscatedAccountId}" +
                                     "\npurchaseState: ${purchase.purchaseState}" +
                                     "\npurchaseTime: ${purchase.purchaseTime}" +
                                     "\ntoken: ${purchase.purchaseToken}" +
@@ -277,7 +278,7 @@ interface SdkManager {
         }
     }
 
-    private fun validateAndConsumePurchase(purchase: Purchase, skipValidation: Boolean = false) {
+    private fun validateAndConsumePurchase(purchase: Purchase, skipValidation: Boolean = true) {
         CoroutineScope(Job()).launch {
             val product = purchase.products.first()
             val purchaseToken = purchase.purchaseToken
