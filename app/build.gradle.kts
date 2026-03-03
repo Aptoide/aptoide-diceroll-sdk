@@ -9,8 +9,8 @@ android {
   namespace = "com.aptoide.diceroll.sdk"
   defaultConfig {
     applicationId = "com.aptoide.diceroll.sdk"
-    versionCode = 1000
-    versionName = "1.0.0"
+    versionCode = 1010
+    versionName = "1.1.0"
     multiDexEnabled = true
   }
     buildTypes {
