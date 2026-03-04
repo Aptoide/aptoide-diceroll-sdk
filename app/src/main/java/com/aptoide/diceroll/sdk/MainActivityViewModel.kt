@@ -15,7 +15,6 @@ import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetSubscriptions
 import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.SaveSelectedSubscriptionUseCase
 import com.aptoide.diceroll.sdk.feature.settings.data.model.UserPrefs
 import com.aptoide.diceroll.sdk.feature.settings.data.repository.UserPrefsDataSource
-import com.aptoide.diceroll.sdk.feature.settings.data.usecases.GetUserUseCase
 import com.aptoide.diceroll.sdk.payments.data.models.PaymentState
 import com.aptoide.diceroll.sdk.payments.data.models.PaymentState.PaymentIdle
 import com.aptoide.diceroll.sdk.payments.data.models.PaymentState.PaymentLoading
@@ -39,7 +38,6 @@ class MainActivityViewModel @Inject constructor(
     val saveSelectedSubscriptionUseCase: SaveSelectedSubscriptionUseCase,
     val consentManager: ConsentManager,
     val analyticsManager: AnalyticsManager,
-    val getUserUseCase: GetUserUseCase
 ) : ViewModel() {
 
     val uiState: StateFlow<MainActivityUiState> =
@@ -71,7 +69,7 @@ class MainActivityViewModel @Inject constructor(
     fun onAdsConsentFinished(isGdprSubject: Boolean, consentState: ConsentState) {
         viewModelScope.launch {
             if (consentState == ConsentState.ACCEPTED) {
-                analyticsManager.startAnalytics(getUserUseCase().uuid, isGdprSubject)
+                analyticsManager.startAnalytics(isGdprSubject)
             }
         }
     }

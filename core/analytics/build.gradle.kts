@@ -36,5 +36,6 @@ android {
 dependencies {
     projectImplementation(":core:analytics:data")
     projectImplementation(":core:analytics:ui")
+    projectImplementation(":feature:settings:data")
     implementation(libs.appsflyer.sdk)
 }
