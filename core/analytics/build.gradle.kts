@@ -1,3 +1,5 @@
+import com.aptoide.diceroll.sdk.convention.extensions.projectImplementation
+
 plugins {
     alias(libs.plugins.compose.compiler)
     id("diceroll.android.library.compose")
@@ -32,5 +34,7 @@ android {
 }
 
 dependencies {
+    projectImplementation(":core:analytics:data")
+    projectImplementation(":core:analytics:ui")
     implementation(libs.appsflyer.sdk)
 }

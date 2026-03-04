@@ -6,9 +6,9 @@ import com.android.billingclient.api.BillingClient
 import com.android.billingclient.api.PendingPurchasesParams
 import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
+import com.aptoide.diceroll.sdk.core.analytics.managers.AnalyticsManager
 import com.aptoide.diceroll.sdk.core.network.clients.rtdn.RTDNWebSocketClient
 import com.aptoide.diceroll.sdk.core.ui.notifications.NotificationHandler
-import com.aptoide.diceroll.sdk.core.analytics.AnalyticsManager
 import com.aptoide.diceroll.sdk.payments.billing.respository.PurchaseValidatorRepository
 import com.aptoide.diceroll.sdk.payments.data.PaymentsResultManager
 import com.aptoide.diceroll.sdk.payments.data.models.InternalPurchase
@@ -88,7 +88,9 @@ class SdkManagerImpl @Inject constructor(
 
         productDetails?.let {
             val revenue = it.oneTimePurchaseOfferDetails?.priceAmountMicros?.div(1000000.0)
-                ?: it.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.priceAmountMicros?.div(1000000.0)
+                ?: it.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.priceAmountMicros?.div(
+                    1000000.0
+                )
                 ?: 0.0
             val currency = it.oneTimePurchaseOfferDetails?.priceCurrencyCode
                 ?: it.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.priceCurrencyCode

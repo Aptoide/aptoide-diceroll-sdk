@@ -3,6 +3,9 @@ package com.aptoide.diceroll.sdk
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aptoide.diceroll.sdk.core.analytics.data.model.ConsentState
+import com.aptoide.diceroll.sdk.core.analytics.managers.AnalyticsManager
+import com.aptoide.diceroll.sdk.core.analytics.managers.ConsentManager
 import com.aptoide.diceroll.sdk.core.permissions.PermissionsManager
 import com.aptoide.diceroll.sdk.core.utils.listen
 import com.aptoide.diceroll.sdk.feature.roll_game.data.model.Subscription
@@ -12,6 +15,7 @@ import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetSubscriptions
 import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.SaveSelectedSubscriptionUseCase
 import com.aptoide.diceroll.sdk.feature.settings.data.model.UserPrefs
 import com.aptoide.diceroll.sdk.feature.settings.data.repository.UserPrefsDataSource
+import com.aptoide.diceroll.sdk.feature.settings.data.usecases.GetUserUseCase
 import com.aptoide.diceroll.sdk.payments.data.models.PaymentState
 import com.aptoide.diceroll.sdk.payments.data.models.PaymentState.PaymentIdle
 import com.aptoide.diceroll.sdk.payments.data.models.PaymentState.PaymentLoading
@@ -32,7 +36,10 @@ class MainActivityViewModel @Inject constructor(
     val userPrefs: UserPrefsDataSource,
     getSubscriptionsPreferencesUseCase: GetSubscriptionsPreferencesUseCase,
     val permissionsManager: PermissionsManager,
-    val saveSelectedSubscriptionUseCase: SaveSelectedSubscriptionUseCase
+    val saveSelectedSubscriptionUseCase: SaveSelectedSubscriptionUseCase,
+    val consentManager: ConsentManager,
+    val analyticsManager: AnalyticsManager,
+    val getUserUseCase: GetUserUseCase
 ) : ViewModel() {
 
     val uiState: StateFlow<MainActivityUiState> =
@@ -54,6 +61,20 @@ class MainActivityViewModel @Inject constructor(
         MutableStateFlow(false)
 
     private val pendingPaymentStates: MutableList<PaymentState> = mutableListOf()
+
+    fun requestConsent(activity: Activity) {
+        consentManager.requestConsent(activity) { isGdprSubject, consentState ->
+            onAdsConsentFinished(isGdprSubject, consentState)
+        }
+    }
+
+    fun onAdsConsentFinished(isGdprSubject: Boolean, consentState: ConsentState) {
+        viewModelScope.launch {
+            if (consentState == ConsentState.ACCEPTED) {
+                analyticsManager.startAnalytics(getUserUseCase().uuid, isGdprSubject)
+            }
+        }
+    }
 
     fun observePaymentState() {
         CoroutineScope(Dispatchers.IO).launch {
