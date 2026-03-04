@@ -13,23 +13,6 @@ android {
     versionName = "1.1.0"
     multiDexEnabled = true
   }
-    buildTypes {
-        debug {
-            buildConfigField(
-                "String",
-                "APPSFLYER_API_KEY",
-                project.property("APPSFLYER_API_KEY").toString()
-            )
-
-        }
-        release {
-            buildConfigField(
-                "String",
-                "APPSFLYER_API_KEY",
-                project.property("APPSFLYER_API_KEY").toString()
-            )
-        }
-    }
     buildFeatures {
         buildConfig = true
     }
@@ -42,6 +25,7 @@ android {
 
 dependencies {
   projectImplementation(":core:analytics")
+  projectImplementation(":core:analytics:data")
   projectImplementation(":core:ui:design")
   projectImplementation(":core:ui:widgets")
   projectImplementation(":core:utils")
@@ -59,5 +43,4 @@ dependencies {
   implementation(libs.androidx.splashscreen)
   implementation(libs.bundles.androidx.compose)
   implementation(libs.bundles.androidx.compose.accompanist)
-  implementation(libs.appsflyer.sdk)
 }
