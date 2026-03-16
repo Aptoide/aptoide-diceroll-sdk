@@ -59,7 +59,7 @@ dependencies {
   projectImplementation(":feature:roll-game:data")
   projectImplementation(":feature:settings:data")
   projectImplementation(":payments:data")
-  googlePlayImplementation(libs.google.billing)
-  aptoideImplementation(libs.aptoide.billing.sdk)
+  add("googlePlayImplementation", libs.google.billing)
+  add("aptoideImplementation", libs.aptoide.billing.sdk)
   implementation(libs.bundles.network)
 }
