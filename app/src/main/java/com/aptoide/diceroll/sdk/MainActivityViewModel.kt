@@ -3,6 +3,9 @@ package com.aptoide.diceroll.sdk
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aptoide.diceroll.sdk.core.analytics.data.model.ConsentState
+import com.aptoide.diceroll.sdk.core.analytics.managers.AnalyticsManager
+import com.aptoide.diceroll.sdk.core.analytics.managers.ConsentManager
 import com.aptoide.diceroll.sdk.core.permissions.PermissionsManager
 import com.aptoide.diceroll.sdk.core.utils.listen
 import com.aptoide.diceroll.sdk.feature.roll_game.data.model.Subscription
@@ -32,7 +35,9 @@ class MainActivityViewModel @Inject constructor(
     val userPrefs: UserPrefsDataSource,
     getSubscriptionsPreferencesUseCase: GetSubscriptionsPreferencesUseCase,
     val permissionsManager: PermissionsManager,
-    val saveSelectedSubscriptionUseCase: SaveSelectedSubscriptionUseCase
+    val saveSelectedSubscriptionUseCase: SaveSelectedSubscriptionUseCase,
+    val consentManager: ConsentManager,
+    val analyticsManager: AnalyticsManager,
 ) : ViewModel() {
 
     val uiState: StateFlow<MainActivityUiState> =
@@ -54,6 +59,20 @@ class MainActivityViewModel @Inject constructor(
         MutableStateFlow(false)
 
     private val pendingPaymentStates: MutableList<PaymentState> = mutableListOf()
+
+    fun requestConsent(activity: Activity) {
+        consentManager.requestConsent(activity) { isGdprSubject, consentState ->
+            onAdsConsentFinished(isGdprSubject, consentState)
+        }
+    }
+
+    fun onAdsConsentFinished(isGdprSubject: Boolean, consentState: ConsentState) {
+        viewModelScope.launch {
+            if (consentState == ConsentState.ACCEPTED) {
+                analyticsManager.startAnalytics(isGdprSubject)
+            }
+        }
+    }
 
     fun observePaymentState() {
         CoroutineScope(Dispatchers.IO).launch {

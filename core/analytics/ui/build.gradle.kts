@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-  namespace = "com.aptoide.diceroll.sdk.feature.settings.ui"
+  namespace = "com.aptoide.diceroll.sdk.core.analytics.ui"
   packaging {
     jniLibs {
       useLegacyPackaging = true
@@ -16,14 +16,8 @@ android {
 }
 
 dependencies {
-  projectImplementation(":core:analytics")
-  projectImplementation(":core:analytics:data")
-  projectImplementation(":payments:billing")
-  projectImplementation(":feature:settings:data")
-  projectImplementation(":feature:stats:data")
-  projectImplementation(":feature:stats:ui")
   projectImplementation(":core:ui:design")
-  projectImplementation(":core:ui:widgets")
   projectImplementation(":core:utils")
   projectImplementation(":core:navigation")
+  implementation(libs.bundles.coil)
 }

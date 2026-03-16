@@ -16,10 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,16 +33,23 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.aptoide.diceroll.sdk.core.analytics.data.model.ConsentState
+import com.aptoide.diceroll.sdk.core.analytics.data.model.UserConsentPrefs
 import com.aptoide.diceroll.sdk.core.ui.design.DiceRollIcons.arrowRight
 import com.aptoide.diceroll.sdk.core.ui.design.R
 import com.aptoide.diceroll.sdk.core.ui.widgets.BuildConfig
@@ -131,6 +140,9 @@ fun SettingsContent(
         ) {
             UserSettingsContent(settingsUiState, onLaunchAppUpdate, onUpdateThemeConfig)
             GeneralSpacer()
+            HeaderTitle(stringResource(R.string.settings_title_privacy_policy))
+            PrivacySettingsScreen(settingsUiState)
+            GeneralSpacer()
             HeaderTitle(stringResource(R.string.settings_title_statistics))
             StatsContent(
                 diceRollList = settingsUiState.diceRollList
@@ -193,6 +205,72 @@ fun ShowUpdateInformation(onLaunchUpdateClick: (Context) -> Unit) {
                     colorFilter = ColorFilter.tint(Color.Black)
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun PrivacySettingsScreen(
+    settingsUiState: Success,
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val uriHandler = LocalUriHandler.current
+
+    val privacyText = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        ) {
+            append(
+                "Allow us to use AppsFlyer for attribution and purchase verification." +
+                    "\nFor more details, see our "
+            )
+
+            pushStringAnnotation(
+                tag = "URL",
+                annotation = "https://github.com/Aptoide/aptoide-diceroll-sdk/blob/master/PRIVACY_POLICY.md"
+            )
+
+            withStyle(
+                style = SpanStyle(
+                    color = MaterialTheme.colorScheme.primary,
+                    textDecoration = TextDecoration.Underline
+                )
+            ) {
+                append("Privacy Policy")
+            }
+
+            pop()
+            append(".")
+        }
+    }
+
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth(1f)
+                .padding(vertical = 8.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                ClickableText(
+                    text = privacyText,
+                    style = MaterialTheme.typography.bodySmall,
+                    onClick = { offset ->
+                        privacyText.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                            .firstOrNull()?.let { annotation ->
+                                uriHandler.openUri(annotation.item)
+                            }
+                    }
+                )
+            }
+            Switch(
+                checked = settingsUiState.userConsentPrefs.userConsentState == ConsentState.ACCEPTED,
+                onCheckedChange = { isChecked ->
+                    viewModel.updateConsent(isChecked)
+                }
+            )
         }
     }
 }
@@ -271,7 +349,10 @@ fun HeaderTitle(title: String) {
 @Preview
 @Composable
 fun Preview() {
-    SettingsContent(Success(UserPrefs(), emptyList()), {}, {})
+    SettingsContent(
+        Success(UserPrefs(), UserConsentPrefs(ConsentState.ACCEPTED), emptyList()),
+        {},
+        {})
 }
 
 @Composable

@@ -1,7 +1,6 @@
 package com.aptoide.diceroll.sdk
 
 import android.app.Application
-import com.appsflyer.AppsFlyerLib
 import com.aptoide.diceroll.sdk.feature.settings.data.usecases.GetUserUseCase
 import com.aptoide.diceroll.sdk.payments.billing.SdkManager
 import dagger.hilt.android.HiltAndroidApp
@@ -19,16 +18,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        initiateAppsFlyerSDK()
         initiateBillingSDK()
-    }
-
-    private fun initiateAppsFlyerSDK() {
-        AppsFlyerLib.getInstance().init(BuildConfig.APPSFLYER_API_KEY, null, applicationContext)
-        AppsFlyerLib.getInstance().waitForCustomerUserId(true)
-        AppsFlyerLib.getInstance().start(this)
-        val userId = getUserUseCase().uuid
-        AppsFlyerLib.getInstance().setCustomerIdAndLogSession(userId, this)
     }
 
     private fun initiateBillingSDK() {
