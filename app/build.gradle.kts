@@ -13,9 +13,22 @@ android {
     versionName = "1.1.0"
     multiDexEnabled = true
   }
-    buildFeatures {
-        buildConfig = true
+
+  flavorDimensions += "distribution"
+  productFlavors {
+    create("googlePlay") {
+      dimension = "distribution"
+      manifestPlaceholders["distributionChannel"] = "GooglePlay"
     }
+    create("aptoide") {
+      dimension = "distribution"
+      manifestPlaceholders["distributionChannel"] = "Aptoide"
+    }
+  }
+
+  buildFeatures {
+    buildConfig = true
+  }
   packaging {
     jniLibs {
       useLegacyPackaging = true

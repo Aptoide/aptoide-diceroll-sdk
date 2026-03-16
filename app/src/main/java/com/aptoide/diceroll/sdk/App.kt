@@ -2,7 +2,7 @@ package com.aptoide.diceroll.sdk
 
 import android.app.Application
 import com.aptoide.diceroll.sdk.feature.settings.data.usecases.GetUserUseCase
-import com.aptoide.diceroll.sdk.payments.billing.SdkManager
+import com.aptoide.diceroll.sdk.payments.billing.IBillingProvider
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -10,7 +10,7 @@ import javax.inject.Inject
 class App : Application() {
 
     @Inject
-    lateinit var sdkManager: SdkManager
+    lateinit var billingProvider: IBillingProvider
 
     @Inject
     lateinit var getUserUseCase: GetUserUseCase
@@ -22,6 +22,6 @@ class App : Application() {
     }
 
     private fun initiateBillingSDK() {
-        sdkManager.setupSdkConnection(this)
+        billingProvider.initialize(this)
     }
 }

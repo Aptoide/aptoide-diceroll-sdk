@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetGoldenDiceStatusUseCase
 import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetTrialDiceStatusUseCase
 import com.aptoide.diceroll.sdk.feature.settings.data.usecases.GetUserUseCase
-import com.aptoide.diceroll.sdk.payments.billing.SdkManager
+import com.aptoide.diceroll.sdk.payments.billing.IBillingProvider
 import com.aptoide.diceroll.sdk.payments.data.models.InternalSkuDetails
 import com.aptoide.diceroll.sdk.payments.data.models.Item
 import com.aptoide.diceroll.sdk.payments.data.models.Item.GoldDice
@@ -21,16 +21,16 @@ import javax.inject.Inject
 
 @HiltViewModel
 class StoreViewModel @Inject constructor(
-    private val sdkManager: SdkManager,
+    private val billingProvider: IBillingProvider,
     private val getUserUseCase: GetUserUseCase,
     private val getGoldenDiceStatusUseCase: GetGoldenDiceStatusUseCase,
     private val getTrialDiceStatusUseCase: GetTrialDiceStatusUseCase,
 ) : ViewModel() {
 
-    internal val purchasableItems: List<InternalSkuDetails> get() = sdkManager._purchasableItems
+    internal val purchasableItems: List<InternalSkuDetails> get() = billingProvider.purchasableItems
 
     fun launchBillingSdkFlow(context: Activity, item: Item) {
-        sdkManager.startPayment(
+        billingProvider.launchPurchase(
             context,
             item.sku,
             item.type,

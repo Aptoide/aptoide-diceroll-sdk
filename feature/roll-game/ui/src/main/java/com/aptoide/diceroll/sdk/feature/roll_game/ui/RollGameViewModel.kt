@@ -10,7 +10,7 @@ import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.SaveAttemptsUseC
 import com.aptoide.diceroll.sdk.feature.settings.data.usecases.GetUserUseCase
 import com.aptoide.diceroll.sdk.feature.stats.data.model.DiceRoll
 import com.aptoide.diceroll.sdk.feature.stats.data.usecases.SaveDiceRollUseCase
-import com.aptoide.diceroll.sdk.payments.billing.SdkManager
+import com.aptoide.diceroll.sdk.payments.billing.IBillingProvider
 import com.aptoide.diceroll.sdk.payments.data.models.Item
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +26,7 @@ import javax.inject.Inject
 class RollGameViewModel @Inject constructor(
     private val saveDiceRollUseCase: SaveDiceRollUseCase,
     private val saveAttemptsUseCase: SaveAttemptsUseCase,
-    private val sdkManager: SdkManager,
+    private val billingProvider: IBillingProvider,
     private val getUserUseCase: GetUserUseCase,
     getAttemptsUseCase: GetAttemptsUseCase,
     getSubscriptionsPreferencesUseCase: GetSubscriptionsPreferencesUseCase,
@@ -44,16 +44,16 @@ class RollGameViewModel @Inject constructor(
             initialValue = RollGameState.Loading,
         )
 
-    internal val sdkConnectionState: StateFlow<Boolean> get() = sdkManager._connectionState
+    internal val sdkConnectionState: StateFlow<Boolean> get() = billingProvider.connectionState
 
-    internal val attemptsPrice: StateFlow<String?> get() = sdkManager._attemptsPrice
+    internal val attemptsPrice: StateFlow<String?> get() = billingProvider.attemptsPrice
 
     suspend fun saveDiceRoll(diceRoll: DiceRoll) {
         saveDiceRollUseCase(diceRoll).also { saveAttemptsUseCase(diceRoll.attemptsLeft) }
     }
 
     fun launchBillingSdkFlow(context: Activity, item: Item) {
-        sdkManager.startPayment(
+        billingProvider.launchPurchase(
             context,
             item.sku,
             item.type,

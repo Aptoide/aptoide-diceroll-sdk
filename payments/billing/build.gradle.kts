@@ -6,6 +6,23 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.payments.billing"
+  val aptoideAppPublicKey = providers.gradleProperty("APTOIDE_APP_PUBLIC_KEY")
+    .orElse(providers.gradleProperty("APTOIDE_APP_PUBLIC_KEY_DEV"))
+    .orElse("")
+    .get()
+
+  flavorDimensions += "distribution"
+  productFlavors {
+    create("googlePlay") {
+      dimension = "distribution"
+      buildConfigField("String", "APTOIDE_APP_PUBLIC_KEY", "\"\"")
+    }
+    create("aptoide") {
+      dimension = "distribution"
+      buildConfigField("String", "APTOIDE_APP_PUBLIC_KEY", "\"$aptoideAppPublicKey\"")
+    }
+  }
+
   buildTypes {
     debug {
       buildConfigField(
@@ -41,6 +58,7 @@ dependencies {
   projectImplementation(":feature:roll-game:data")
   projectImplementation(":feature:settings:data")
   projectImplementation(":payments:data")
-  implementation(libs.google.billing)
+  googlePlayImplementation(libs.google.billing)
+  aptoideImplementation(libs.aptoide.billing.sdk)
   implementation(libs.bundles.network)
 }

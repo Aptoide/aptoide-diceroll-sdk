@@ -2,6 +2,7 @@ pluginManagement {
   repositories {
     google()
     mavenCentral()
+    maven { url = uri("https://repo.aptoide.com/repository/maven-public/") }
     mavenLocal()
     gradlePluginPortal()
     flatDir {
@@ -25,6 +26,7 @@ dependencyResolutionManagement {
   repositories {
     google()
     mavenCentral()
+    maven { url = uri("https://repo.aptoide.com/repository/maven-public/") }
     mavenLocal()
     maven { url = uri("https://jitpack.io") }
     maven {

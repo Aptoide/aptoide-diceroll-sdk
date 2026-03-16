@@ -8,10 +8,9 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object SdkManagerModule {
+object BillingProviderModule {
 
     @Provides
     @Singleton
-    fun provideSdkManager(sdkManagerImpl: SdkManagerImpl): SdkManager =
-        sdkManagerImpl
+    fun provideBillingProvider(provider: AptoideBillingProvider): IBillingProvider = provider
 }

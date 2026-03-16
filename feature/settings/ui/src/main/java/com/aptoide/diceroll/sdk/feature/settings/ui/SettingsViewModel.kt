@@ -14,7 +14,7 @@ import com.aptoide.diceroll.sdk.feature.settings.ui.SettingsUiState.Loading
 import com.aptoide.diceroll.sdk.feature.settings.ui.SettingsUiState.Success
 import com.aptoide.diceroll.sdk.feature.stats.data.model.DiceRoll
 import com.aptoide.diceroll.sdk.feature.stats.data.usecases.GetDiceRollsUseCase
-import com.aptoide.diceroll.sdk.payments.billing.SdkManager
+import com.aptoide.diceroll.sdk.payments.billing.IBillingProvider
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userPrefsDataSource: UserPrefsDataSource,
-    private val sdkManager: SdkManager,
+    private val billingProvider: IBillingProvider,
     getDiceRollsUseCase: GetDiceRollsUseCase,
     getUserConsentPrefsUseCase: GetUserConsentPrefsUseCase,
     private val analyticsManager: AnalyticsManager,
@@ -51,7 +51,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun launchAppUpdateDialog(context: Context) {
-        sdkManager.launchAppUpdateDialog(context)
+        billingProvider.launchAppUpdateDialog(context)
     }
 
     fun updateConsent(accepted: Boolean) {

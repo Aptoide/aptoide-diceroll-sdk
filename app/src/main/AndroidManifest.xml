@@ -17,7 +17,9 @@
         android:theme="@style/DiceRoll.Splash"
         tools:targetApi="33">
 
-        <meta-data android:name="CHANNEL" android:value="Aptoide"/>
+        <meta-data
+            android:name="CHANNEL"
+            android:value="${distributionChannel}" />
 
         <activity
             android:name=".MainActivity"
