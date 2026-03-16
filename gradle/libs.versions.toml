@@ -16,8 +16,6 @@ androidx_room_version = "2.6.0-beta01"
 androidx_splashscreen = "1.0.1"
 appsflyer_version = "6.17.5"
 build_tools_version = "30.0.3"
-aptoide_billing_version = "1.2.1"
-#aptoide_billing_version = "1.2.1.dev-SNAPSHOT"
 coil_version = "2.3.0"
 corektx_version = "1.12.0"
 coroutines_version = "1.7.2"
@@ -107,7 +105,6 @@ coil-kt-svg = { module = "io.coil-kt:coil-svg", version.ref = "coil_version" }
 lottie = { module = "com.airbnb.android:lottie-compose", version.ref = "lottie_version" }
 charts_tehras = { module = "com.github.tehras:charts", version.ref = "tehras_charts_version" }
 android-support-annotations = { module = "com.android.support:support-annotations", version.ref = "support_annotations" }
-android-aptoide-billing = { module = "com.aptoide:android-aptoide-billing", version.ref = "aptoide_billing_version" }
 google-billing = { module = "com.android.billingclient:billing-ktx", version.ref = "google_billing_version" }
 
 jetbrains-annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains_annotations_version" }

@@ -16,7 +16,7 @@ android {
     buildConfigField(
       "String",
       "SDK_BILLING_LIBRARY_VERSION",
-      "\"${libs.android.aptoide.billing.get().version}\""
+      "\"${libs.google.billing.get().version}\""
     )
   }
   packaging {

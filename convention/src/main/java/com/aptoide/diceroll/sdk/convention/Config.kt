@@ -33,6 +33,4 @@ object Config {
   )
 
   const val versionFlavorDimension = "version"
-  const val googlePlayBillingVersion = "googlePlay"
-  const val aptoideBillingVersion = "aptoide"
 }

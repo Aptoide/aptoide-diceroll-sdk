@@ -47,14 +47,6 @@ class AndroidAppPlugin : Plugin<Project> {
         }
 
         flavorDimensions.add(Config.versionFlavorDimension)
-        productFlavors {
-          create(Config.googlePlayBillingVersion) {
-            dimension = Config.versionFlavorDimension
-          }
-          create(Config.aptoideBillingVersion) {
-            dimension = Config.versionFlavorDimension
-          }
-        }
 
         applicationVariants.all {
           val sep = "_"

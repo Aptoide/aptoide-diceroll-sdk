@@ -1,4 +1,4 @@
-package com.aptoide.diceroll.sdk.payments.billing.respository
+package com.aptoide.diceroll.sdk.payments.billing.repository
 
 import android.content.Context
 import com.aptoide.diceroll.sdk.core.network.modules.api.PurchaseValidatorApi

@@ -24,14 +24,6 @@ class AndroidLibraryPlugin : Plugin<Project> {
         defaultConfig.targetSdk = Config.android.targetSdk
 
         flavorDimensions.add(Config.versionFlavorDimension)
-        productFlavors {
-          create(Config.googlePlayBillingVersion) {
-            dimension = Config.versionFlavorDimension
-          }
-          create(Config.aptoideBillingVersion) {
-            dimension = Config.versionFlavorDimension
-          }
-        }
       }
 
       dependencies {

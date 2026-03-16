@@ -6,8 +6,6 @@ import android.util.Log
 import com.android.billingclient.api.AcknowledgePurchaseParams
 import com.android.billingclient.api.AcknowledgePurchaseResponseListener
 import com.android.billingclient.api.BillingClient
-import com.android.billingclient.api.BillingClient.BillingResponseCode
-import com.android.billingclient.api.BillingClient.ProductType
 import com.android.billingclient.api.BillingClientStateListener
 import com.android.billingclient.api.BillingFlowParams
 import com.android.billingclient.api.BillingResult
@@ -17,18 +15,14 @@ import com.android.billingclient.api.ProductDetails
 import com.android.billingclient.api.Purchase
 import com.android.billingclient.api.PurchasesUpdatedListener
 import com.android.billingclient.api.QueryProductDetailsParams
-import com.android.billingclient.api.QueryProductDetailsParams.Product
 import com.android.billingclient.api.QueryProductDetailsResult
 import com.android.billingclient.api.QueryPurchasesParams
-import com.aptoide.diceroll.sdk.payments.billing.respository.PurchaseValidatorRepository
+import com.aptoide.diceroll.sdk.payments.billing.repository.PurchaseValidatorRepository
 import com.aptoide.diceroll.sdk.payments.data.models.InternalResponseCode
-import com.aptoide.diceroll.sdk.payments.data.models.InternalResponseCode.ERROR
-import com.aptoide.diceroll.sdk.payments.data.models.InternalResponseCode.ITEM_UNAVAILABLE
 import com.aptoide.diceroll.sdk.payments.data.models.InternalSkuDetails
 import com.aptoide.diceroll.sdk.payments.data.models.InternalSkuType
 import com.aptoide.diceroll.sdk.payments.data.models.Item
-import com.aptoide.diceroll.sdk.payments.data.models.PaymentState.PaymentError
-import com.aptoide.diceroll.sdk.payments.data.models.PaymentState.PaymentLoading
+import com.aptoide.diceroll.sdk.payments.data.models.PaymentState
 import com.aptoide.diceroll.sdk.payments.data.streams.PurchaseStateStream
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -99,7 +93,7 @@ interface SdkManager {
             object : BillingClientStateListener {
                 override fun onBillingSetupFinished(billingResult: BillingResult) {
                     when (billingResult.responseCode) {
-                        BillingResponseCode.OK -> {
+                        BillingClient.BillingResponseCode.OK -> {
                             Log.i(
                                 LOG_TAG,
                                 "BillingClientStateListener: Google SDK Setup successful. Querying inventory."
@@ -148,7 +142,7 @@ interface SdkManager {
     val purchasesUpdatedListener: PurchasesUpdatedListener
         get() = PurchasesUpdatedListener { billingResult: BillingResult, purchases: MutableList<Purchase>? ->
             when (billingResult.responseCode) {
-                BillingResponseCode.OK -> {
+                BillingClient.BillingResponseCode.OK -> {
                     if (!purchases.isNullOrEmpty()) {
                         for (purchase in purchases) {
                             _purchases.add(purchase)
@@ -176,10 +170,10 @@ interface SdkManager {
                     } else {
                         CoroutineScope(Job()).launch {
                             PurchaseStateStream.publish(
-                                PaymentError(
+                                PaymentState.PaymentError(
                                     null,
                                     InternalResponseCode.entries.find { it.value == billingResult.responseCode }
-                                        ?: ERROR)
+                                        ?: InternalResponseCode.ERROR)
                             )
                         }
                     }
@@ -188,10 +182,10 @@ interface SdkManager {
                 else -> {
                     CoroutineScope(Job()).launch {
                         PurchaseStateStream.publish(
-                            PaymentError(
+                            PaymentState.PaymentError(
                                 null,
                                 InternalResponseCode.entries.find { it.value == billingResult.responseCode }
-                                    ?: ERROR)
+                                    ?: InternalResponseCode.ERROR)
                         )
                     }
                     Log.d(
@@ -253,14 +247,19 @@ interface SdkManager {
      */
     fun startPayment(activity: Activity, sku: String, skuType: String, developerPayload: String?) {
         CoroutineScope(Job()).launch {
-            PurchaseStateStream.eventFlow.emit(PaymentLoading)
+            PurchaseStateStream.eventFlow.emit(PaymentState.PaymentLoading)
         }
 
         val productDetails = _myItems.firstOrNull { it.productId == sku }
 
         if (productDetails == null) {
             CoroutineScope(Job()).launch {
-                PurchaseStateStream.eventFlow.emit(PaymentError(null, ITEM_UNAVAILABLE))
+                PurchaseStateStream.eventFlow.emit(
+                    PaymentState.PaymentError(
+                        null,
+                        InternalResponseCode.ITEM_UNAVAILABLE
+                    )
+                )
             }
             return
         }
@@ -269,7 +268,7 @@ interface SdkManager {
             BillingFlowParams.ProductDetailsParams.newBuilder()
                 .setProductDetails(productDetails)
                 .apply {
-                    if (skuType == ProductType.SUBS) {
+                    if (skuType == BillingClient.ProductType.SUBS) {
                         setOfferToken(
                             productDetails.subscriptionOfferDetails?.firstOrNull()?.offerToken ?: ""
                         )
@@ -311,7 +310,12 @@ interface SdkManager {
                 processSuccessfulPurchase(purchase)
             } else {
                 CoroutineScope(Job()).launch {
-                    PurchaseStateStream.publish(PaymentError(Item.fromSku(product), ERROR))
+                    PurchaseStateStream.publish(
+                        PaymentState.PaymentError(
+                            Item.fromSku(product),
+                            InternalResponseCode.ERROR
+                        )
+                    )
                 }
                 Log.e(LOG_TAG, "There was an error verifying the Purchase on Server side.")
             }
@@ -337,7 +341,12 @@ interface SdkManager {
                 processSuccessfulPurchase(purchase)
             } else {
                 CoroutineScope(Job()).launch {
-                    PurchaseStateStream.publish(PaymentError(Item.fromSku(product), ERROR))
+                    PurchaseStateStream.publish(
+                        PaymentState.PaymentError(
+                            Item.fromSku(product),
+                            InternalResponseCode.ERROR
+                        )
+                    )
                 }
                 Log.e(LOG_TAG, "There was an error verifying the Purchase on Server side.")
             }
@@ -346,9 +355,10 @@ interface SdkManager {
 
     private fun queryPurchases() {
         billingClient.queryPurchasesAsync(
-            QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build()
+            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP)
+                .build()
         ) { billingResult, purchases ->
-            if (billingResult.responseCode == BillingResponseCode.OK) {
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 for (purchase in purchases) {
                     _purchases.add(purchase)
                     validateAndConsumePurchase(purchase)
@@ -359,9 +369,9 @@ interface SdkManager {
 
     private fun queryActiveSubscriptions() {
         billingClient.queryPurchasesAsync(
-            QueryPurchasesParams.newBuilder().setProductType(ProductType.SUBS).build()
+            QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.SUBS).build()
         ) { billingResult, purchases ->
-            if (billingResult.responseCode == BillingResponseCode.OK) {
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 for (purchase in purchases) {
                     _purchases.add(purchase)
                     validateAndAcknowledgePurchase(purchase)
@@ -376,9 +386,9 @@ interface SdkManager {
             QueryProductDetailsParams.newBuilder()
                 .setProductList(
                     skuList.map {
-                        Product.newBuilder()
+                        QueryProductDetailsParams.Product.newBuilder()
                             .setProductId(it)
-                            .setProductType(ProductType.INAPP)
+                            .setProductType(BillingClient.ProductType.INAPP)
                             .build()
                     }
                 )
@@ -388,7 +398,7 @@ interface SdkManager {
             processProductDetailsResult(
                 billingResult,
                 productDetailsResult,
-                ProductType.INAPP
+                BillingClient.ProductType.INAPP
             )
         }
     }
@@ -398,9 +408,9 @@ interface SdkManager {
             QueryProductDetailsParams.newBuilder()
                 .setProductList(
                     skuList.map {
-                        Product.newBuilder()
+                        QueryProductDetailsParams.Product.newBuilder()
                             .setProductId(it)
-                            .setProductType(ProductType.SUBS)
+                            .setProductType(BillingClient.ProductType.SUBS)
                             .build()
                     }
                 )
@@ -410,7 +420,7 @@ interface SdkManager {
             processProductDetailsResult(
                 billingResult,
                 details,
-                ProductType.SUBS
+                BillingClient.ProductType.SUBS
             )
         }
     }
@@ -460,7 +470,7 @@ interface SdkManager {
     }
 
     private fun getPriceFromProduct(productDetails: ProductDetails, skuType: String): String {
-        return if (skuType == ProductType.SUBS) {
+        return if (skuType == BillingClient.ProductType.SUBS) {
             productDetails.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.formattedPrice
                 ?: ""
         } else {
@@ -474,7 +484,7 @@ interface SdkManager {
             .getOrDefault(false)
 
     private fun isSubscriptionTypeProduct(product: String?): Boolean {
-        return _myItems.firstOrNull { it.productId == product }?.productType == ProductType.SUBS
+        return _myItems.firstOrNull { it.productId == product }?.productType == BillingClient.ProductType.SUBS
     }
 
     private fun isNonConsumableProduct(product: String?): Boolean {
