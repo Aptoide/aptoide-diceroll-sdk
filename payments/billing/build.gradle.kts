@@ -11,6 +11,7 @@ android {
     .orElse("")
     .get()
 
+  flavorDimensions.clear()
   flavorDimensions += "distribution"
   productFlavors {
     create("googlePlay") {

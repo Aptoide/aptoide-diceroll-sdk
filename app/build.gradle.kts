@@ -14,6 +14,7 @@ android {
     multiDexEnabled = true
   }
 
+  flavorDimensions.clear()
   flavorDimensions += "distribution"
   productFlavors {
     create("googlePlay") {
