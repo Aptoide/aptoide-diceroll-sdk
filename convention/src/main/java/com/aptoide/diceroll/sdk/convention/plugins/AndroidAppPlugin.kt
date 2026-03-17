@@ -46,7 +46,7 @@ class AndroidAppPlugin : Plugin<Project> {
           }
         }
 
-        flavorDimensions.add(Config.versionFlavorDimension)
+        flavorDimensions.add(Config.distributionFlavorDimension)
 
         applicationVariants.all {
           val sep = "_"

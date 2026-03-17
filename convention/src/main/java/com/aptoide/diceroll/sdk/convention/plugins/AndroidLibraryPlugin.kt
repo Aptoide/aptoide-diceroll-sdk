@@ -23,7 +23,18 @@ class AndroidLibraryPlugin : Plugin<Project> {
         configureAndroidAndKotlin(this)
         defaultConfig.targetSdk = Config.android.targetSdk
 
-        flavorDimensions.add(Config.versionFlavorDimension)
+        flavorDimensions.add(Config.distributionFlavorDimension)
+
+        // Declare distribution flavors in every library module so that Gradle's
+        // attribute-based variant resolution works across the full dependency graph.
+        // Modules that don't need distribution-specific code use src/main for all
+        // variants; only :payments:billing overrides these with flavor source sets.
+        productFlavors.create("googlePlay") {
+          dimension = Config.distributionFlavorDimension
+        }
+        productFlavors.create("aptoide") {
+          dimension = Config.distributionFlavorDimension
+        }
       }
 
       dependencies {

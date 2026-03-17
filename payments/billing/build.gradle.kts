@@ -6,6 +6,19 @@ plugins {
 
 android {
   namespace = "com.aptoide.diceroll.sdk.payments.billing"
+
+  productFlavors {
+    // The convention plugin creates "googlePlay" and "aptoide" flavors for all library modules.
+    // Here we only customize the aptoide flavor to add the public key build config field.
+    getByName("aptoide") {
+      buildConfigField(
+        "String",
+        "APTOIDE_PUBLIC_KEY",
+        project.property("APTOIDE_PUBLIC_KEY").toString()
+      )
+    }
+  }
+
   buildTypes {
     debug {
       buildConfigField(
@@ -13,7 +26,6 @@ android {
         "PUBLIC_KEY",
         project.property("DICEROLL_SDK_PUBLIC_KEY_DEV").toString()
       )
-
     }
     release {
       buildConfigField(
@@ -23,6 +35,7 @@ android {
       )
     }
   }
+
   buildFeatures {
     buildConfig = true
   }
@@ -41,6 +54,7 @@ dependencies {
   projectImplementation(":feature:roll-game:data")
   projectImplementation(":feature:settings:data")
   projectImplementation(":payments:data")
-  implementation(libs.google.billing)
+  "googlePlayImplementation"(libs.google.billing)
+  "aptoideImplementation"(libs.aptoide.billing)
   implementation(libs.bundles.network)
 }

@@ -13,12 +13,21 @@ android {
     versionName = "1.1.0"
     multiDexEnabled = true
   }
-    buildFeatures {
-        buildConfig = true
-    }
+  buildFeatures {
+    buildConfig = true
+  }
   packaging {
     jniLibs {
       useLegacyPackaging = true
+    }
+  }
+
+  productFlavors {
+    create("googlePlay") {
+      dimension = "distribution"
+    }
+    create("aptoide") {
+      dimension = "distribution"
     }
   }
 }
