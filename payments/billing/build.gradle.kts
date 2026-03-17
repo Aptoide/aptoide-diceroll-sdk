@@ -13,13 +13,26 @@ android {
         "PUBLIC_KEY",
         project.property("DICEROLL_SDK_PUBLIC_KEY_DEV").toString()
       )
-
     }
     release {
       buildConfigField(
         "String",
         "PUBLIC_KEY",
         project.property("DICEROLL_SDK_PUBLIC_KEY").toString()
+      )
+    }
+  }
+  flavorDimensions += "distribution"
+  productFlavors {
+    create("googlePlay") {
+      dimension = "distribution"
+    }
+    create("aptoide") {
+      dimension = "distribution"
+      buildConfigField(
+        "String",
+        "APTOIDE_PUBLIC_KEY",
+        "\"PASTE_YOUR_PUBLIC_KEY_HERE\""
       )
     }
   }
@@ -41,6 +54,7 @@ dependencies {
   projectImplementation(":feature:roll-game:data")
   projectImplementation(":feature:settings:data")
   projectImplementation(":payments:data")
-  implementation(libs.google.billing)
+  "googlePlayImplementation"(libs.google.billing)
+  "aptoideImplementation"(libs.aptoide.billing)
   implementation(libs.bundles.network)
 }

@@ -1,0 +1,105 @@
+package com.aptoide.diceroll.sdk.payments.billing
+
+import android.content.Context
+import androidx.compose.runtime.mutableStateListOf
+import com.aptoide.sdk.billing.AptoideBillingClient
+import com.aptoide.sdk.billing.ProductDetails
+import com.aptoide.sdk.billing.Purchase
+import com.aptoide.diceroll.sdk.core.analytics.managers.AnalyticsManager
+import com.aptoide.diceroll.sdk.core.network.clients.rtdn.RTDNWebSocketClient
+import com.aptoide.diceroll.sdk.core.ui.notifications.NotificationHandler
+import com.aptoide.diceroll.sdk.payments.billing.repository.PurchaseValidatorRepository
+import com.aptoide.diceroll.sdk.payments.data.PaymentsResultManager
+import com.aptoide.diceroll.sdk.payments.data.models.InternalPurchase
+import com.aptoide.diceroll.sdk.payments.data.models.InternalSkuDetails
+import com.aptoide.diceroll.sdk.payments.data.rtdn.RTDNMessageListenerImpl
+import com.aptoide.diceroll.sdk.payments.data.usecases.GetMessageFromRTDNResponseUseCase
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import javax.inject.Inject
+
+class SdkManagerImpl @Inject constructor(
+    @ApplicationContext
+    val context: Context,
+    purchaseValidatorRepository: PurchaseValidatorRepository,
+    getMessageFromRTDNResponseUseCase: GetMessageFromRTDNResponseUseCase,
+    notificationHandler: NotificationHandler,
+    private val webSocketClient: RTDNWebSocketClient,
+    private val paymentsResultManager: PaymentsResultManager,
+    private val analyticsManager: AnalyticsManager,
+) : SdkManager {
+
+    override lateinit var billingClient: AptoideBillingClient
+
+    override val _connectionState: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
+    override val _attemptsPrice: MutableStateFlow<String?> = MutableStateFlow(null)
+
+    override val _purchasableItems: MutableList<InternalSkuDetails> =
+        mutableStateListOf()
+
+    override val _myItems: MutableList<ProductDetails> = mutableStateListOf()
+
+    override val _purchases: ArrayList<Purchase> = ArrayList()
+
+    override val _purchaseValidatorRepository: PurchaseValidatorRepository =
+        purchaseValidatorRepository
+
+    private var isRTDNConnectionEstablished = false
+
+    private val rtdnListener = RTDNMessageListenerImpl(
+        notificationHandler,
+        getMessageFromRTDNResponseUseCase,
+        ::onRemoveSubscription
+    )
+
+    override fun setupSdkConnection(context: Context) {
+        billingClient = AptoideBillingClient.newBuilder(context)
+            .setListener(purchasesUpdatedListener)
+            .setPublicKey(BuildConfig.APTOIDE_PUBLIC_KEY)
+            .build()
+        billingClient.startConnection(billingClientStateListener)
+    }
+
+    override fun processSuccessfulPurchase(purchase: Purchase) {
+        val productId = purchase.products.first()
+        val productDetails = _myItems.find { it.productId == productId }
+
+        productDetails?.let {
+            val revenue = it.oneTimePurchaseOfferDetails?.priceAmountMicros?.div(1000000.0)
+                ?: it.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.priceAmountMicros?.div(
+                    1000000.0
+                )
+                ?: 0.0
+            val currency = it.oneTimePurchaseOfferDetails?.priceCurrencyCode
+                ?: it.subscriptionOfferDetails?.firstOrNull()?.pricingPhases?.pricingPhaseList?.firstOrNull()?.priceCurrencyCode
+                ?: "USD"
+
+            analyticsManager.logPurchaseEvent(
+                revenue = revenue,
+                currency = currency,
+                productId = productId,
+                productType = it.productType
+            )
+        }
+
+        paymentsResultManager.processSuccessfulResult(
+            InternalPurchase(purchase.products.first())
+        )
+    }
+
+    override fun processExpiredPurchases(purchases: List<Purchase>) {
+        paymentsResultManager.processExpiredSubscriptions(purchases.map { it.products.first() })
+    }
+
+    override fun setupRTDNListener() {
+        if (!isRTDNConnectionEstablished) {
+            webSocketClient.connectToRTDNApi(rtdnListener)
+            isRTDNConnectionEstablished = true
+        }
+    }
+
+    private fun onRemoveSubscription(sku: String) {
+        paymentsResultManager.removeExpiredSubscription(sku)
+    }
+}

@@ -30,7 +30,12 @@ dependencyResolutionManagement {
     maven {
       name = "MavenCentral-Snapshots"
       url = uri("https://central.sonatype.com/repository/maven-snapshots")
-    }  }
+    }
+    maven {
+      name = "AptoidePublic"
+      url = uri("https://repo.aptoide.com/repository/maven-public/")
+    }
+  }
 }
 
 val (projects, modules) = rootDir.projectsAndModules()

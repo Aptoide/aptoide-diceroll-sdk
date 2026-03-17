@@ -22,6 +22,7 @@ class AndroidLibraryPlugin : Plugin<Project> {
       extensions.configure<LibraryExtension> {
         configureAndroidAndKotlin(this)
         defaultConfig.targetSdk = Config.android.targetSdk
+        defaultConfig.missingDimensionStrategy(Config.distributionFlavorDimension, "googlePlay")
 
         flavorDimensions.add(Config.versionFlavorDimension)
       }

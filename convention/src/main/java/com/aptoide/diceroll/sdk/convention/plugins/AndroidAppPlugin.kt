@@ -47,6 +47,7 @@ class AndroidAppPlugin : Plugin<Project> {
         }
 
         flavorDimensions.add(Config.versionFlavorDimension)
+        defaultConfig.missingDimensionStrategy(Config.distributionFlavorDimension, "googlePlay")
 
         applicationVariants.all {
           val sep = "_"

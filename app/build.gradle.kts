@@ -13,9 +13,18 @@ android {
     versionName = "1.1.0"
     multiDexEnabled = true
   }
-    buildFeatures {
-        buildConfig = true
+  buildFeatures {
+    buildConfig = true
+  }
+  flavorDimensions += "distribution"
+  productFlavors {
+    create("googlePlay") {
+      dimension = "distribution"
     }
+    create("aptoide") {
+      dimension = "distribution"
+    }
+  }
   packaging {
     jniLibs {
       useLegacyPackaging = true

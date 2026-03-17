@@ -33,4 +33,5 @@ object Config {
   )
 
   const val versionFlavorDimension = "version"
+  const val distributionFlavorDimension = "distribution"
 }
