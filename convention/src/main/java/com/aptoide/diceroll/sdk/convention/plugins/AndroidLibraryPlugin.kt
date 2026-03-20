@@ -22,8 +22,6 @@ class AndroidLibraryPlugin : Plugin<Project> {
       extensions.configure<LibraryExtension> {
         configureAndroidAndKotlin(this)
         defaultConfig.targetSdk = Config.android.targetSdk
-
-        flavorDimensions.add(Config.versionFlavorDimension)
       }
 
       dependencies {

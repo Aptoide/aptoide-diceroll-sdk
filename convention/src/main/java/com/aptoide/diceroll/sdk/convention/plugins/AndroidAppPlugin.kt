@@ -46,8 +46,6 @@ class AndroidAppPlugin : Plugin<Project> {
           }
         }
 
-        flavorDimensions.add(Config.versionFlavorDimension)
-
         applicationVariants.all {
           val sep = "_"
           val buildType = buildType.name

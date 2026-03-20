@@ -31,6 +31,4 @@ object Config {
     val kotlinJvm: String,
     val freeCompilerArgs: List<String>
   )
-
-  const val versionFlavorDimension = "version"
 }
