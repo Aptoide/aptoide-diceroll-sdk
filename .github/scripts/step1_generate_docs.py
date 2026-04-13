@@ -24,7 +24,7 @@ CURSOR_AGENT_URL = "https://api.cursor.com/v0/agents"
 DEFAULT_MODEL = "claude-4.5-sonnet-thinking"
 # Branch the Cursor Background Agent commits PROJECT_DOCUMENTATION.md to.
 # Override with the DOCS_BRANCH env var if needed.
-DEFAULT_DOCS_BRANCH = "chore/ai-generated-documentation-v1"
+DEFAULT_DOCS_BRANCH = "chore/ai-generated-documentation"
 
 MAX_DIFF_SIZE = 15_000
 TRACKED_EXTENSIONS = ["*.py", "*.yaml", "*.yml", "*.toml", "*.json", "*.txt"]

@@ -132,7 +132,7 @@ def main() -> None:
     api_token = os.environ["CONFLUENCE_API_TOKEN"]
     space_key = os.environ["CONFLUENCE_SPACE_KEY"]
     parent_id = os.environ.get("CONFLUENCE_PARENT_PAGE_ID") or None
-    page_title = os.environ.get("CONFLUENCE_PAGE_TITLE", "Aptoide RTB – Service Documentation")
+    page_title = os.environ.get("CONFLUENCE_PAGE_TITLE", "Unknown")
 
     auth = HTTPBasicAuth(username, api_token)
 
