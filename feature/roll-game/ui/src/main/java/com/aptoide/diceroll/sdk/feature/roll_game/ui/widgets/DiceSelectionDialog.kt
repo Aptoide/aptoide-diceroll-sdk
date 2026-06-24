@@ -40,10 +40,12 @@ import androidx.compose.ui.unit.sp
 import com.aptoide.diceroll.sdk.core.ui.design.R
 import com.aptoide.diceroll.sdk.core.ui.design.theme.darkAppColorScheme
 import com.aptoide.diceroll.sdk.core.ui.design.theme.darkGoldenDiceAppColorScheme
+import com.aptoide.diceroll.sdk.core.ui.design.theme.darkRainbowDiceAppColorScheme
 import com.aptoide.diceroll.sdk.core.ui.design.theme.darkTrialDiceAppColorScheme
 import com.aptoide.diceroll.sdk.feature.roll_game.data.model.Subscription
 import com.aptoide.diceroll.sdk.feature.roll_game.data.model.Subscription.DEFAULT
 import com.aptoide.diceroll.sdk.feature.roll_game.data.model.Subscription.GOLDEN_DICE
+import com.aptoide.diceroll.sdk.feature.roll_game.data.model.Subscription.RAINBOW_DICE
 import com.aptoide.diceroll.sdk.feature.roll_game.data.model.Subscription.TRIAL_DICE
 import com.aptoide.diceroll.sdk.feature.roll_game.data.model.SubscriptionPrefs
 import com.aptoide.diceroll.sdk.payments.data.models.Item
@@ -151,6 +153,15 @@ private fun SubscriptionSelectionPanel(
                 color = darkGoldenDiceAppColorScheme.tertiary,
                 selected = subscriptionPrefs.selectedSubscription == GOLDEN_DICE,
                 onClick = { onChangeSelectedSubscription(GOLDEN_DICE) },
+            )
+        }
+
+        if (subscriptionPrefs.availableSubscriptions.contains(RAINBOW_DICE)) {
+            DiceChooserRow(
+                text = "Rainbow Dice",
+                color = darkRainbowDiceAppColorScheme.tertiary,
+                selected = subscriptionPrefs.selectedSubscription == RAINBOW_DICE,
+                onClick = { onChangeSelectedSubscription(RAINBOW_DICE) },
             )
         }
 

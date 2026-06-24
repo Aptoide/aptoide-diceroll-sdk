@@ -6,5 +6,5 @@ data class SubscriptionPrefs(
 )
 
 enum class Subscription {
-    DEFAULT, GOLDEN_DICE, TRIAL_DICE
+    DEFAULT, GOLDEN_DICE, TRIAL_DICE, RAINBOW_DICE
 }

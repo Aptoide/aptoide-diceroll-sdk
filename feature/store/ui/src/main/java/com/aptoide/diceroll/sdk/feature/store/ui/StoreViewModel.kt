@@ -38,6 +38,20 @@ class StoreViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Signs in to the Aptoide account and restores owned purchases (including the
+     * non-consumable Legendary Dice). Triggered by the "Restore purchases" button.
+     */
+    fun onRestoreClicked(activity: Activity) {
+        sdkManager.restorePurchases(activity)
+    }
+
+    /**
+     * Whether account sign-in is currently enabled by the backend, used to optionally
+     * hide/disable the "Restore purchases" entry point.
+     */
+    fun isRestoreAvailable(): Boolean = sdkManager.isAccountSignInSupported()
+
     fun getSubscriptionStateForSKU(skuDetails: InternalSkuDetails): StateFlow<Boolean> {
         when (skuDetails.sku) {
             GoldDice.sku -> return getGoldenDiceStatusUseCase()

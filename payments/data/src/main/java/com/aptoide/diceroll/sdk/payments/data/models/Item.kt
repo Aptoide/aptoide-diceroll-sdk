@@ -53,6 +53,22 @@ sealed class Item(
             context.resources.getString(R.string.payment_item_non_consumable_attempts_success_message)
     }
 
+    data object LegendaryDice : ConsumableItem(LEGENDARY_DICE_SKU) {
+        override fun getErrorMessage(context: Context, responseCode: ResponseCode): String =
+            when (responseCode) {
+                USER_CANCELED -> context.resources.getString(R.string.payment_item_legendary_dice_error_message_user_cancelled)
+                SERVICE_UNAVAILABLE -> context.resources.getString(R.string.payment_item_general_error_message_service_unavailable)
+                DEVELOPER_ERROR -> context.resources.getString(R.string.payment_item_general_error_message_developer_error)
+                else -> context.resources.getString(R.string.payment_item_general_error_message_unknown)
+            }
+
+        override fun getRefundMessage(context: Context): String =
+            context.resources.getString(R.string.payment_item_legendary_dice_refund_message)
+
+        override fun getSuccessMessage(context: Context): String =
+            context.resources.getString(R.string.payment_item_legendary_dice_success_message)
+    }
+
     data object GoldDice : SubscriptionItem(GOLD_DICE_SKU) {
         override fun getErrorMessage(context: Context, responseCode: ResponseCode): String =
             when (responseCode) {
@@ -127,6 +143,8 @@ sealed class Item(
 
         const val NON_CONSUMABLE_ATTEMPTS_SKU = "non_consumable_attempts"
 
+        const val LEGENDARY_DICE_SKU = "legendary_dice"
+
         const val GOLD_DICE_SKU = "golden_dice"
 
         const val TEST_GREEN_DICE_SKU = "test_green_dice"
@@ -137,6 +155,7 @@ sealed class Item(
             when (sku) {
                 ATTEMPTS_SKU -> Attempts
                 NON_CONSUMABLE_ATTEMPTS_SKU -> NonConsumableAttempts
+                LEGENDARY_DICE_SKU -> LegendaryDice
                 GOLD_DICE_SKU -> GoldDice
                 TEST_GREEN_DICE_SKU -> TestGreenDice
                 TRIAL_DICE_SKU -> TrialDice

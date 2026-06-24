@@ -295,6 +295,21 @@ interface SdkManager {
         //cab.launchAppUpdateDialog(context)
     }
 
+    /**
+     * Account sign-in via a hosted WebView is an Aptoide-only feature. On Google Play purchases are
+     * already tied to the device's signed-in Google account, so there is no separate sign-in step.
+     */
+    fun isAccountSignInSupported(): Boolean = false
+
+    /**
+     * Restores owned purchases. On Google Play the user's purchases are bound to the device's Google
+     * account, so restoring simply means re-querying owned in-app products and subscriptions.
+     */
+    fun restorePurchases(activity: Activity) {
+        queryPurchases()
+        queryActiveSubscriptions()
+    }
+
     private fun validateAndConsumePurchase(purchase: Purchase, skipValidation: Boolean = false) {
         CoroutineScope(Job()).launch {
             val product = purchase.products.first()

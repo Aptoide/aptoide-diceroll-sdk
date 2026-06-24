@@ -586,6 +586,21 @@ fun getGameResources(subscriptionPrefs: SubscriptionPrefs) =
                 ImageVector.vectorResource(id = com.aptoide.diceroll.sdk.feature.roll_game.ui.R.drawable.ic_golden_dice_sdk_title)
             )
 
+        Subscription.RAINBOW_DICE ->
+            Quadruple(
+                GameR.drawable.ic_base_rainbow_dice,
+                listOf(
+                    GameR.drawable.ic_dice_1_rainbow,
+                    GameR.drawable.ic_dice_2_rainbow,
+                    GameR.drawable.ic_dice_3_rainbow,
+                    GameR.drawable.ic_dice_4_rainbow,
+                    GameR.drawable.ic_dice_5_rainbow,
+                    GameR.drawable.ic_dice_6_rainbow,
+                ),
+                ImageVector.vectorResource(id = com.aptoide.diceroll.sdk.feature.roll_game.ui.R.drawable.ic_golden_radiant_shadows),
+                ImageVector.vectorResource(id = com.aptoide.diceroll.sdk.feature.roll_game.ui.R.drawable.ic_golden_dice_sdk_title)
+            )
+
         Subscription.TRIAL_DICE ->
             Quadruple(
                 GameR.drawable.ic_base_trial_dice,

@@ -29,6 +29,7 @@
     <string name="store_screen_description">Choose the items you wish to purchase:</string>
     <string name="store_screen_unsubscribe_button_text">Unsubscribe</string>
     <string name="store_screen_subscribed_text">Subscribed</string>
+    <string name="store_screen_restore_purchases_button_text">Restore purchases</string>
 
     <!-- Stats Screen -->
     <string name="stats_win_percentage">Win %</string>
@@ -44,6 +45,9 @@
     <string name="payment_item_non_consumable_attempts_error_message_user_cancelled">Purchase for Non-Consumable Attempts was cancelled.</string>
     <string name="payment_item_non_consumable_attempts_refund_message">Your Purchase for Non-Consumable Attempts was Refunded.</string>
     <string name="payment_item_non_consumable_attempts_success_message">You have received 10 non-consumable attempts.</string>
+    <string name="payment_item_legendary_dice_error_message_user_cancelled">Purchase for Legendary Dice was cancelled.</string>
+    <string name="payment_item_legendary_dice_refund_message">Your Purchase for the Legendary Dice was Refunded.</string>
+    <string name="payment_item_legendary_dice_success_message">You have unlocked the Rainbow Dice skin!</string>
     <string name="payment_item_golden_dice_error_message_user_cancelled">Purchase for Golden Dice was cancelled.</string>
     <string name="payment_item_golden_dice_refund_message">Your Subscription for the Golden Dice was Refunded.</string>
     <string name="payment_item_golden_dice_success_message">You are now subscribed to the Golden Dice.</string>

@@ -5,12 +5,14 @@ import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetTrialDiceStat
 import com.aptoide.diceroll.sdk.payments.data.models.InternalPurchase
 import com.aptoide.diceroll.sdk.payments.data.models.Item.Attempts
 import com.aptoide.diceroll.sdk.payments.data.models.Item.GoldDice
+import com.aptoide.diceroll.sdk.payments.data.models.Item.LegendaryDice
 import com.aptoide.diceroll.sdk.payments.data.models.Item.NonConsumableAttempts
 import com.aptoide.diceroll.sdk.payments.data.models.Item.TrialDice
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessExpiredGoldenDicePurchaseUseCase
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessExpiredTrialDicePurchaseUseCase
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessSuccessfulAttemptsPurchaseUseCase
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessSuccessfulGoldenDicePurchaseUseCase
+import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessSuccessfulLegendaryDicePurchaseUseCase
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessSuccessfulTrialDicePurchaseUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -20,6 +22,7 @@ import javax.inject.Inject
 
 class PaymentsResultManager @Inject constructor(
     private val processSuccessfulGoldenDicePurchaseUseCase: ProcessSuccessfulGoldenDicePurchaseUseCase,
+    private val processSuccessfulLegendaryDicePurchaseUseCase: ProcessSuccessfulLegendaryDicePurchaseUseCase,
     private val processSuccessfulTrialDicePurchaseUseCase: ProcessSuccessfulTrialDicePurchaseUseCase,
     private val processSuccessfulAttemptsPurchaseUseCase: ProcessSuccessfulAttemptsPurchaseUseCase,
     private val processExpiredGoldenDicePurchaseUseCase: ProcessExpiredGoldenDicePurchaseUseCase,
@@ -35,6 +38,7 @@ class PaymentsResultManager @Inject constructor(
                     processSuccessfulAttemptsPurchaseUseCase(NonConsumableAttempts)
 
                 GoldDice.sku -> processSuccessfulGoldenDicePurchaseUseCase()
+                LegendaryDice.sku -> processSuccessfulLegendaryDicePurchaseUseCase()
                 TrialDice.sku -> processSuccessfulTrialDicePurchaseUseCase()
             }
         }
