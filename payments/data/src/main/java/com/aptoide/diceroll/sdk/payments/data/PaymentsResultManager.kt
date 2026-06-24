@@ -1,6 +1,7 @@
 package com.aptoide.diceroll.sdk.payments.data
 
 import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetGoldenDiceStatusUseCase
+import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetLegendaryDiceStatusUseCase
 import com.aptoide.diceroll.sdk.feature.roll_game.data.usecases.GetTrialDiceStatusUseCase
 import com.aptoide.diceroll.sdk.payments.data.models.InternalPurchase
 import com.aptoide.diceroll.sdk.payments.data.models.Item.Attempts
@@ -9,6 +10,7 @@ import com.aptoide.diceroll.sdk.payments.data.models.Item.LegendaryDice
 import com.aptoide.diceroll.sdk.payments.data.models.Item.NonConsumableAttempts
 import com.aptoide.diceroll.sdk.payments.data.models.Item.TrialDice
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessExpiredGoldenDicePurchaseUseCase
+import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessExpiredLegendaryDicePurchaseUseCase
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessExpiredTrialDicePurchaseUseCase
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessSuccessfulAttemptsPurchaseUseCase
 import com.aptoide.diceroll.sdk.payments.data.usecases.ProcessSuccessfulGoldenDicePurchaseUseCase
@@ -26,8 +28,10 @@ class PaymentsResultManager @Inject constructor(
     private val processSuccessfulTrialDicePurchaseUseCase: ProcessSuccessfulTrialDicePurchaseUseCase,
     private val processSuccessfulAttemptsPurchaseUseCase: ProcessSuccessfulAttemptsPurchaseUseCase,
     private val processExpiredGoldenDicePurchaseUseCase: ProcessExpiredGoldenDicePurchaseUseCase,
+    private val processExpiredLegendaryDicePurchaseUseCase: ProcessExpiredLegendaryDicePurchaseUseCase,
     private val processExpiredTrialDicePurchaseUseCase: ProcessExpiredTrialDicePurchaseUseCase,
     private val getGoldenDiceStatusUseCase: GetGoldenDiceStatusUseCase,
+    private val getLegendaryDiceStatusUseCase: GetLegendaryDiceStatusUseCase,
     private val getTrialDiceStatusUseCase: GetTrialDiceStatusUseCase,
 ) {
     fun processSuccessfulResult(internalPurchase: InternalPurchase) {
@@ -61,5 +65,22 @@ class PaymentsResultManager @Inject constructor(
 
     fun removeExpiredSubscription(sku: String) {
         processExpiredSubscriptions(listOf(sku))
+    }
+
+    /**
+     * Revokes owned non-consumable entitlements that are no longer returned by the INAPP purchases
+     * query (e.g. the user signed out of Aptoide services or the purchase was refunded). Mirrors
+     * [processExpiredSubscriptions] but for one-time INAPP non-consumables such as `legendary_dice`.
+     *
+     * @param listSkus the SKUs currently returned as owned by `queryPurchasesAsync(INAPP)`.
+     */
+    fun processExpiredNonConsumables(listSkus: List<String>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            if (getLegendaryDiceStatusUseCase.invoke().firstOrNull() == true) {
+                if (listSkus.firstOrNull { it == LegendaryDice.sku } == null) {
+                    processExpiredLegendaryDicePurchaseUseCase()
+                }
+            }
+        }
     }
 }

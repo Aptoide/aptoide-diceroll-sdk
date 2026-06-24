@@ -88,6 +88,13 @@ interface SdkManager {
     fun processExpiredPurchases(purchases: List<Purchase>)
 
     /**
+     * Process non-consumable INAPP purchases that are no longer owned (not returned by the INAPP
+     * purchases query) so their entitlement can be revoked — e.g. the user signed out of Aptoide
+     * services or the purchase was refunded.
+     */
+    fun processExpiredNonConsumablePurchases(purchases: List<Purchase>)
+
+    /**
      * Listener for Aptoide billing client state changes.
      *
      * This listener handles events related to the connection state
@@ -332,6 +339,9 @@ interface SdkManager {
                         _purchases.add(purchase)
                         finalizePurchase(purchase) // grants entitlement for every returned purchase
                     }
+                    // Revoke any previously owned non-consumable that is no longer returned
+                    // (e.g. refunded, or owned by a different account after sign-in).
+                    processExpiredNonConsumablePurchases(purchases)
                 } else {
                     Log.e(LOG_TAG, "Restore query failed: ${result.debugMessage}")
                 }
@@ -462,6 +472,8 @@ interface SdkManager {
                     // consumables are consumed — both handled by finalizePurchase.
                     finalizePurchase(purchase)
                 }
+                // Revoke any previously owned non-consumable that is no longer returned.
+                processExpiredNonConsumablePurchases(purchases)
             }
         }
     }
