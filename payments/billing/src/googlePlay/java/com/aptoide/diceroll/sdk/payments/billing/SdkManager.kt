@@ -86,6 +86,13 @@ interface SdkManager {
     fun processExpiredPurchases(purchases: List<Purchase>)
 
     /**
+     * Process non-consumable INAPP purchases that are no longer owned (not returned by the INAPP
+     * purchases query) so their entitlement can be revoked — e.g. the purchase was refunded or
+     * voided on the Google account.
+     */
+    fun processExpiredNonConsumablePurchases(purchases: List<Purchase>)
+
+    /**
      * Listener for Google Billing Client state changes.
      *
      * This listener handles events related to the connection state
@@ -166,12 +173,7 @@ interface SdkManager {
                                     "\nisAutoRenewing: ${purchase.isAutoRenewing}"
                             )
 
-                            val product = purchase.products.first()
-                            if (isSubscriptionTypeProduct(product) || isNonConsumableProduct(product)) {
-                                validateAndAcknowledgePurchase(purchase)
-                            } else {
-                                validateAndConsumePurchase(purchase)
-                            }
+                            finalizePurchase(purchase)
                         }
                     } else {
                         CoroutineScope(Job()).launch {
@@ -310,6 +312,22 @@ interface SdkManager {
         queryActiveSubscriptions()
     }
 
+    /**
+     * Routes a purchase to the correct finalization flow following Google Play Billing semantics:
+     * - Non-consumable one-time products (e.g. `legendary_dice`) are **acknowledged** so they stay
+     *   owned and keep being returned by `queryPurchasesAsync`.
+     * - Subscriptions are **acknowledged** as well (Google requires acknowledgment to avoid refund).
+     * - Genuinely consumable products are **consumed** so they can be repurchased.
+     */
+    private fun finalizePurchase(purchase: Purchase) {
+        val product = purchase.products.first()
+        when {
+            isNonConsumableProduct(product) -> validateAndAcknowledgePurchase(purchase)
+            isSubscriptionTypeProduct(product) -> validateAndAcknowledgePurchase(purchase)
+            else -> validateAndConsumePurchase(purchase)
+        }
+    }
+
     private fun validateAndConsumePurchase(purchase: Purchase, skipValidation: Boolean = false) {
         CoroutineScope(Job()).launch {
             val product = purchase.products.first()
@@ -366,8 +384,12 @@ interface SdkManager {
             if (billingResult.responseCode == BillingResponseCode.OK) {
                 for (purchase in purchases) {
                     _purchases.add(purchase)
-                    validateAndConsumePurchase(purchase)
+                    // Owned non-consumables (e.g. legendary_dice) are acknowledged & granted,
+                    // consumables are consumed — both handled by finalizePurchase.
+                    finalizePurchase(purchase)
                 }
+                // Revoke any previously owned non-consumable that is no longer returned.
+                processExpiredNonConsumablePurchases(purchases)
             }
         }
     }
@@ -493,7 +515,7 @@ interface SdkManager {
     }
 
     private fun isNonConsumableProduct(product: String?): Boolean {
-        val nonConsumableProducts = listOf("non_consumable_attempts")
+        val nonConsumableProducts = listOf("non_consumable_attempts") + Skus.NON_CONSUMABLE_SKUS
         return nonConsumableProducts.contains(product)
     }
 

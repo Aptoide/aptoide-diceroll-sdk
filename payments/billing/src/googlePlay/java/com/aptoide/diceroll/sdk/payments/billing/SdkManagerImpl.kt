@@ -113,6 +113,10 @@ class SdkManagerImpl @Inject constructor(
         paymentsResultManager.processExpiredSubscriptions(purchases.map { it.products.first() })
     }
 
+    override fun processExpiredNonConsumablePurchases(purchases: List<Purchase>) {
+        paymentsResultManager.processExpiredNonConsumables(purchases.map { it.products.first() })
+    }
+
     override fun setupRTDNListener() {
         if (!isRTDNConnectionEstablished) {
             webSocketClient.connectToRTDNApi(rtdnListener)
