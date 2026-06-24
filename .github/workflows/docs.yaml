@@ -1,0 +1,94 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Step 1 – AI Documentation Generation
+  #
+  # Runs on every push to main EXCEPT the bot's own "AI Generated Docs update."
+  # commit (to prevent an infinite trigger loop) and ruff formatter commits.
+  #
+  # Calls the Cursor Background Agent, which writes PROJECT_DOCUMENTATION.md to
+  # the docs branch. The job then fetches that file, commits it to main with the
+  # mandatory sentinel message, and pushes — which triggers the sync job below.
+  # ---------------------------------------------------------------------------
+  generate-docs:
+    name: Generate documentation via Cursor
+    runs-on: ubuntu-latest
+    if: |
+      github.event.head_commit.message != 'AI Generated Docs update.' &&
+      !contains(github.event.head_commit.message, 'Apply ruff fixes and formatter changes')
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # Need at least 2 commits so step1 can diff HEAD~1..HEAD.
+          fetch-depth: 2
+          # Use a PAT or the default token. The default token is fine for
+          # pushing back to the same repo as long as 'contents: write' is set.
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install script dependencies
+        run: pip install requests markdown python-dotenv
+
+      - name: Run Step 1 – Cursor AI generation
+        env:
+          CURSOR_AGENT_KEY: ${{ secrets.CURSOR_AGENT_KEY }}
+          CURSOR_MODEL: ${{ secrets.CURSOR_MODEL }}
+          # Branch the Cursor Background Agent commits PROJECT_DOCUMENTATION.md to.
+          DOCS_BRANCH: chore/ai-generated-documentation-v1
+          # Passed through automatically by GitHub Actions
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python .github/scripts/step1_generate_docs.py
+
+  # ---------------------------------------------------------------------------
+  # Step 2 – Confluence Synchronization
+  #
+  # Runs ONLY when the commit that landed on main is the sentinel commit
+  # created by the generate-docs job above. This guarantees that Confluence is
+  # always in sync with the AI-reviewed, committed Markdown file.
+  # ---------------------------------------------------------------------------
+  sync-confluence:
+    name: Sync documentation to Confluence
+    runs-on: ubuntu-latest
+    if: github.event.head_commit.message == 'AI Generated Docs update.'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install script dependencies
+        run: pip install requests markdown python-dotenv
+
+      - name: Run Step 2 – Confluence sync
+        env:
+          CONFLUENCE_BASE_URL: ${{ secrets.CONFLUENCE_BASE_URL }}
+          CONFLUENCE_USERNAME: ${{ secrets.CONFLUENCE_USERNAME }}
+          CONFLUENCE_API_TOKEN: ${{ secrets.CONFLUENCE_API_TOKEN }}
+          CONFLUENCE_SPACE_KEY: ${{ secrets.CONFLUENCE_SPACE_KEY }}
+          CONFLUENCE_PAGE_TITLE: ${{ secrets.CONFLUENCE_PAGE_TITLE }}
+          CONFLUENCE_PARENT_PAGE_ID: ${{ secrets.CONFLUENCE_PARENT_PAGE_ID }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python .github/scripts/step2_sync_confluence.py
