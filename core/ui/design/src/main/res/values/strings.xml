@@ -29,7 +29,6 @@
     <string name="store_screen_description">Choose the items you wish to purchase:</string>
     <string name="store_screen_unsubscribe_button_text">Unsubscribe</string>
     <string name="store_screen_subscribed_text">Subscribed</string>
-    <string name="store_screen_restore_purchases_button_text">Restore purchases</string>
 
     <!-- Stats Screen -->
     <string name="stats_win_percentage">Win %</string>
@@ -73,4 +72,7 @@
     <string name="settings_title_app_information">App Information</string>
     <string name="settings_title_statistics">Statistics</string>
     <string name="settings_title_privacy_policy">Privacy Policy</string>
+    <string name="settings_title_aptoide">Aptoide</string>
+    <string name="settings_aptoide_sign_in">Sign in to Aptoide Services</string>
+    <string name="settings_aptoide_logout">Logout from Aptoide Services</string>
 </resources>

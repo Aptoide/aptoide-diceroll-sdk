@@ -45,6 +45,8 @@ class SdkManagerImpl @Inject constructor(
 
     override val _connectionState: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
+    override val _accountSignedInState: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     override val _attemptsPrice: MutableStateFlow<String?> = MutableStateFlow(null)
 
     override val _purchasableItems: MutableList<InternalSkuDetails> =
@@ -73,6 +75,7 @@ class SdkManagerImpl @Inject constructor(
     override fun setupSdkConnection(context: Context) {
         billingClient = AptoideBillingClient.newBuilder(context)
             .setListener(purchasesUpdatedListener)
+            .setAccountStateListener { state -> onAccountStateChanged(state) }
             .setPublicKey(PUBLIC_KEY)
             .build()
         billingClient.startConnection(aptoideBillingClientStateListener)

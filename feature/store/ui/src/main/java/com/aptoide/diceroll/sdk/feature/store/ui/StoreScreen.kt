@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,7 +53,6 @@ internal fun StoreRoute(
     storeViewModel: StoreViewModel = hiltViewModel()
 ) {
     val purchasableItemsList = storeViewModel.purchasableItems
-    val activity = LocalContext.current as Activity
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -80,7 +78,6 @@ internal fun StoreRoute(
                 fontSize = 12.sp,
                 modifier = Modifier.padding(horizontal = 0.dp, vertical = 8.dp),
             )
-            RestorePurchasesButton(onClick = { storeViewModel.onRestoreClicked(activity) })
             LazyColumn(
                 modifier = Modifier.fillMaxHeight()
             ) {
@@ -93,22 +90,6 @@ internal fun StoreRoute(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun RestorePurchasesButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-    ) {
-        Text(
-            text = stringResource(id = R.string.store_screen_restore_purchases_button_text),
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.background,
-        )
     }
 }
 

@@ -1,5 +1,6 @@
 package com.aptoide.diceroll.sdk.feature.settings.ui
 
+import android.app.Activity
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -44,6 +45,29 @@ class SettingsViewModel @Inject constructor(
             initialValue = Loading,
         )
 
+    val aptoideAccountUiState: StateFlow<AptoideAccountUiState> =
+        combine(
+            sdkManager._connectionState,
+            sdkManager._accountSignedInState
+        ) { _, signedIn ->
+            AptoideAccountUiState(
+                isSignInSupported = sdkManager.isAccountSignInSupported(),
+                isSignedIn = signedIn
+            )
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = AptoideAccountUiState(),
+        )
+
+    fun onAptoideSignInClicked(activity: Activity) {
+        sdkManager.signIn(activity)
+    }
+
+    fun onAptoideLogoutClicked() {
+        sdkManager.signOut()
+    }
+
     fun updateThemeConfig(themeConfig: ThemeConfig) {
         viewModelScope.launch {
             userPrefsDataSource.saveThemeConfig(themeConfig)
@@ -70,3 +94,8 @@ sealed interface SettingsUiState {
         val diceRollList: List<DiceRoll>,
     ) : SettingsUiState
 }
+
+data class AptoideAccountUiState(
+    val isSignInSupported: Boolean = false,
+    val isSignedIn: Boolean = false,
+)

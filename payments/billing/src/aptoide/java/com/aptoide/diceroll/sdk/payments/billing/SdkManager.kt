@@ -57,6 +57,8 @@ interface SdkManager {
 
     val _connectionState: MutableStateFlow<Boolean>
 
+    val _accountSignedInState: MutableStateFlow<Boolean>
+
     val _attemptsPrice: MutableStateFlow<String?>
 
     val _purchasableItems: MutableList<InternalSkuDetails>
@@ -114,6 +116,7 @@ interface SdkManager {
                                 "AptoideBillingClientStateListener: Aptoide SDK Setup successful. Querying inventory."
                             )
                             _connectionState.value = true
+                            _accountSignedInState.value = isSignedIn()
                             setupRTDNListener()
                             queryPurchases()
                             queryActiveSubscriptions()
@@ -292,60 +295,63 @@ interface SdkManager {
             billingClient.isFeatureSupported(FeatureType.ACCOUNT_SIGN_IN).responseCode == BillingResponseCode.OK
 
     /**
-     * Signs the user in to their Aptoide account (showing the sign-in WebView when needed) and, on
-     * success, restores any owned purchases — including acknowledged non-consumables such as
-     * `legendary_dice` — so they are re-granted across reinstalls / new devices.
-     *
-     * Should only be triggered once the SDK connection is established (i.e. after
-     * [onBillingSetupFinished] returns `OK`); the natural trigger is a "Restore purchases" button.
+     * Whether the user is currently signed in to their Aptoide account (synchronous).
      */
-    fun restorePurchases(activity: Activity) {
+    fun isSignedIn(): Boolean = billingClient.isSignedInToAptoideServices()
+
+    /**
+     * Launches the Aptoide account sign-in WebView. On `OK` the account-state listener
+     * ([onAccountStateChanged]) refreshes the settings UI and re-queries purchases, so there is
+     * nothing else to do here on success.
+     */
+    fun signIn(activity: Activity) {
         billingClient.signInToAptoideServices(activity) { result ->
             // The sign-in callback may arrive on a background thread → marshal to main.
             CoroutineScope(Dispatchers.Main).launch {
                 when (result.responseCode) {
-                    BillingResponseCode.OK ->
-                        restoreOwnedPurchases() // signed in (or already signed in) → query now
-
-                    BillingResponseCode.USER_CANCELED ->
-                        Log.i(LOG_TAG, "User dismissed sign-in")
-
-                    BillingResponseCode.FEATURE_NOT_SUPPORTED ->
-                        Log.i(LOG_TAG, "Account sign-in disabled by backend")
-
-                    BillingResponseCode.SERVICE_UNAVAILABLE ->
-                        Log.i(LOG_TAG, "Not ready yet (config loading) — retry shortly")
-
-                    else ->
-                        Log.e(LOG_TAG, "Sign-in error: ${result.debugMessage}")
+                    BillingResponseCode.OK -> Unit // account-state listener handles refresh
+                    BillingResponseCode.USER_CANCELED -> Log.i(LOG_TAG, "Sign-in dismissed")
+                    BillingResponseCode.FEATURE_NOT_SUPPORTED -> Log.i(LOG_TAG, "Sign-in disabled by backend")
+                    BillingResponseCode.SERVICE_UNAVAILABLE -> Log.i(LOG_TAG, "Not ready yet — retry shortly")
+                    else -> Log.e(LOG_TAG, "Sign-in error: ${result.debugMessage}")
                 }
             }
         }
     }
 
     /**
-     * Queries owned INAPP purchases and re-grants their entitlements. `queryPurchasesAsync` now
-     * returns owned purchases including ACKNOWLEDGED non-consumables. Subscriptions (e.g.
-     * `golden_dice`) are restored separately through the existing subscription logic.
+     * Signs the user out of their Aptoide account. This is asynchronous and has no result callback;
+     * the account-state listener ([onAccountStateChanged]) fires `SIGNED_OUT` and reconciles
+     * entitlements (e.g. revoking the account's `legendary_dice` rainbow skin).
      */
-    private fun restoreOwnedPurchases() {
-        val params = QueryPurchasesParams.newBuilder()
-            .setProductType(ProductType.INAPP)
-            .build()
-        billingClient.queryPurchasesAsync(params) { result, purchases ->
-            CoroutineScope(Dispatchers.Main).launch {
-                if (result.responseCode == BillingResponseCode.OK) {
-                    purchases.forEach { purchase ->
-                        _purchases.add(purchase)
-                        finalizePurchase(purchase) // grants entitlement for every returned purchase
-                    }
-                    // Revoke any previously owned non-consumable that is no longer returned
-                    // (e.g. refunded, or owned by a different account after sign-in).
-                    processExpiredNonConsumablePurchases(purchases)
-                } else {
-                    Log.e(LOG_TAG, "Restore query failed: ${result.debugMessage}")
-                }
-            }
+    fun signOut() {
+        billingClient.signOutFromAptoideServices()
+    }
+
+    /**
+     * Re-queries owned purchases for BOTH product types and reconciles entitlements (grant present /
+     * revoke absent). Both queries already grant owned products and revoke ones no longer returned:
+     * - INAPP via [queryPurchases] (acknowledges & grants `legendary_dice`, revokes if gone),
+     * - SUBS via [queryActiveSubscriptions] (grants `golden_dice`/`trial_dice`, revokes if gone).
+     */
+    fun refreshAllPurchases() {
+        queryPurchases()
+        queryActiveSubscriptions()
+    }
+
+    /**
+     * Handles an Aptoide account-state change (registered once on the builder via
+     * `setAccountStateListener`). Fires on every actual sign-in/out transition — including ones
+     * performed inside the payment WebView — so the app updates the signed-in state observed by the
+     * settings UI and reconciles entitlements without a restart.
+     *
+     * @param state one of [AptoideBillingClient.AccountState] (`SIGNED_IN` / `SIGNED_OUT`).
+     */
+    fun onAccountStateChanged(state: Int) {
+        // The account-state callback may arrive on a background thread → marshal to main.
+        CoroutineScope(Dispatchers.Main).launch {
+            _accountSignedInState.value = state == AptoideBillingClient.AccountState.SIGNED_IN
+            refreshAllPurchases()
         }
     }
 

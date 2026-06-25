@@ -55,6 +55,8 @@ interface SdkManager {
 
     val _connectionState: MutableStateFlow<Boolean>
 
+    val _accountSignedInState: MutableStateFlow<Boolean>
+
     val _attemptsPrice: MutableStateFlow<String?>
 
     val _purchasableItems: MutableList<InternalSkuDetails>
@@ -304,10 +306,32 @@ interface SdkManager {
     fun isAccountSignInSupported(): Boolean = false
 
     /**
-     * Restores owned purchases. On Google Play the user's purchases are bound to the device's Google
-     * account, so restoring simply means re-querying owned in-app products and subscriptions.
+     * On Google Play the user is always implicitly signed in via the device's Google account, so
+     * there is no separate Aptoide session to expose. The "Aptoide" settings block is hidden anyway
+     * (see [isAccountSignInSupported]).
      */
-    fun restorePurchases(activity: Activity) {
+    fun isSignedIn(): Boolean = false
+
+    /**
+     * No Aptoide sign-in flow exists on Google Play; re-query owned purchases so the behaviour is
+     * still useful if ever invoked.
+     */
+    fun signIn(activity: Activity) {
+        refreshAllPurchases()
+    }
+
+    /**
+     * Signing out of the device's Google account is not something the app can do; no-op on Google Play.
+     */
+    fun signOut() {
+        // Not supported on Google Play.
+    }
+
+    /**
+     * Re-queries owned purchases for both product types and reconciles entitlements (grant present /
+     * revoke absent) — INAPP via [queryPurchases] and SUBS via [queryActiveSubscriptions].
+     */
+    fun refreshAllPurchases() {
         queryPurchases()
         queryActiveSubscriptions()
     }

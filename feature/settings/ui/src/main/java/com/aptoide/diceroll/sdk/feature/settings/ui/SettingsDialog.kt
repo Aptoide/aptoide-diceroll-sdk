@@ -1,5 +1,6 @@
 package com.aptoide.diceroll.sdk.feature.settings.ui
 
+import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -140,6 +141,7 @@ fun SettingsContent(
         ) {
             UserSettingsContent(settingsUiState, onLaunchAppUpdate, onUpdateThemeConfig)
             GeneralSpacer()
+            AptoideAccountSection()
             HeaderTitle(stringResource(R.string.settings_title_privacy_policy))
             PrivacySettingsScreen(settingsUiState)
             GeneralSpacer()
@@ -207,6 +209,59 @@ fun ShowUpdateInformation(onLaunchUpdateClick: (Context) -> Unit) {
             }
         }
     }
+}
+
+@Composable
+fun AptoideAccountSection(
+    viewModel: SettingsViewModel = hiltViewModel()
+) {
+    val accountState by viewModel.aptoideAccountUiState.collectAsStateWithLifecycle()
+    if (!accountState.isSignInSupported) return
+
+    HeaderTitle(stringResource(R.string.settings_title_aptoide))
+    Row(
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .fillMaxWidth(1f),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = if (accountState.isSignedIn) {
+                stringResource(id = R.string.settings_aptoide_logout)
+            } else {
+                stringResource(id = R.string.settings_aptoide_sign_in)
+            },
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold,
+            color = colorResource(id = com.aptoide.diceroll.sdk.feature.settings.ui.R.color.primary)
+        )
+        Spacer(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+        )
+        val activity = LocalContext.current as Activity
+        Box(
+            modifier = Modifier
+                .clip(shape = RoundedCornerShape(100))
+                .background(MaterialTheme.colorScheme.primary, RectangleShape)
+                .padding(4.dp)
+                .clickable {
+                    if (accountState.isSignedIn) {
+                        viewModel.onAptoideLogoutClicked()
+                    } else {
+                        viewModel.onAptoideSignInClicked(activity)
+                    }
+                },
+        ) {
+            Image(
+                imageVector = arrowRight,
+                contentDescription = "Details",
+                colorFilter = ColorFilter.tint(Color.Black)
+            )
+        }
+    }
+    GeneralSpacer()
 }
 
 @Composable

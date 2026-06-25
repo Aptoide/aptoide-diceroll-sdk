@@ -46,6 +46,8 @@ class SdkManagerImpl @Inject constructor(
 
     override val _connectionState: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
+    override val _accountSignedInState: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     override val _attemptsPrice: MutableStateFlow<String?> = MutableStateFlow(null)
 
     override val _purchasableItems: MutableList<InternalSkuDetails> =
