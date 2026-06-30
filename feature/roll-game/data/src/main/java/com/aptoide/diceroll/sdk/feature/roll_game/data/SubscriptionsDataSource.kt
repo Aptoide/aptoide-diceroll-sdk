@@ -57,6 +57,9 @@ class SubscriptionsDataSource @Inject constructor(
             if (it[GOLDEN_DICE_ACTIVE] == true) {
                 mutableListAvailableSubscriptions.add(Subscription.GOLDEN_DICE)
             }
+            if (it[LEGENDARY_DICE_ACTIVE] == true) {
+                mutableListAvailableSubscriptions.add(Subscription.RAINBOW_DICE)
+            }
 
             val selectedSubscription = Subscription.entries[it[SELECTED_SUBSCRIPTION] ?: 0]
 
@@ -66,6 +69,7 @@ class SubscriptionsDataSource @Inject constructor(
 
     companion object {
         val GOLDEN_DICE_ACTIVE = booleanPreferencesKey("golden_dice_active")
+        val LEGENDARY_DICE_ACTIVE = booleanPreferencesKey("legendary_dice_active")
         val TRIAL_DICE_ACTIVE = booleanPreferencesKey("trial_dice_active")
         val SELECTED_SUBSCRIPTION = intPreferencesKey("selected_subscription")
     }

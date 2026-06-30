@@ -25,12 +25,14 @@ fun DiceRollTheme(
         when (subscriptionTypeDiceTheme) {
             Subscription.TRIAL_DICE -> darkTrialDiceAppColorScheme
             Subscription.GOLDEN_DICE -> darkGoldenDiceAppColorScheme
+            Subscription.RAINBOW_DICE -> darkRainbowDiceAppColorScheme
             else -> darkAppColorScheme
         }
     } else {
         when (subscriptionTypeDiceTheme) {
             Subscription.TRIAL_DICE -> darkTrialDiceAppColorScheme
             Subscription.GOLDEN_DICE -> darkGoldenDiceAppColorScheme
+            Subscription.RAINBOW_DICE -> darkRainbowDiceAppColorScheme
             else -> darkAppColorScheme
         }
     }

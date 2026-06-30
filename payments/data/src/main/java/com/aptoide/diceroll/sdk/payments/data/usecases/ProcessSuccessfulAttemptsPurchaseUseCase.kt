@@ -18,6 +18,7 @@ class ProcessSuccessfulAttemptsPurchaseUseCase @Inject constructor(
         when (item) {
             Attempts -> addAttemptsUseCase()
             NonConsumableAttempts -> addAttemptsUseCase(NON_CONSUMABLE_ATTEMPTS_NUMBER)
+            else -> Unit // Other consumable items (e.g. LegendaryDice) are handled by their own use case.
         }
     }
 }

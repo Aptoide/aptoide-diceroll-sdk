@@ -46,6 +46,8 @@ class SdkManagerImpl @Inject constructor(
 
     override val _connectionState: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
+    override val _accountSignedInState: MutableStateFlow<Boolean> = MutableStateFlow(false)
+
     override val _attemptsPrice: MutableStateFlow<String?> = MutableStateFlow(null)
 
     override val _purchasableItems: MutableList<InternalSkuDetails> =
@@ -111,6 +113,10 @@ class SdkManagerImpl @Inject constructor(
 
     override fun processExpiredPurchases(purchases: List<Purchase>) {
         paymentsResultManager.processExpiredSubscriptions(purchases.map { it.products.first() })
+    }
+
+    override fun processExpiredNonConsumablePurchases(purchases: List<Purchase>) {
+        paymentsResultManager.processExpiredNonConsumables(purchases.map { it.products.first() })
     }
 
     override fun setupRTDNListener() {

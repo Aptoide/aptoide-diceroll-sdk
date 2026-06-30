@@ -17,6 +17,7 @@ import com.aptoide.sdk.billing.AptoideBillingClient
 import com.aptoide.sdk.billing.AptoideBillingClient.BillingResponseCode
 import com.aptoide.sdk.billing.AptoideBillingClient.FeatureType
 import com.aptoide.sdk.billing.AptoideBillingClient.ProductType
+import com.aptoide.sdk.billing.AcknowledgeParams
 import com.aptoide.sdk.billing.BillingFlowParams
 import com.aptoide.sdk.billing.BillingResult
 import com.aptoide.sdk.billing.ConsumeParams
@@ -32,6 +33,7 @@ import com.aptoide.sdk.billing.listeners.ConsumeResponseListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
@@ -54,6 +56,8 @@ interface SdkManager {
     val billingClient: AptoideBillingClient
 
     val _connectionState: MutableStateFlow<Boolean>
+
+    val _accountSignedInState: MutableStateFlow<Boolean>
 
     val _attemptsPrice: MutableStateFlow<String?>
 
@@ -86,6 +90,13 @@ interface SdkManager {
     fun processExpiredPurchases(purchases: List<Purchase>)
 
     /**
+     * Process non-consumable INAPP purchases that are no longer owned (not returned by the INAPP
+     * purchases query) so their entitlement can be revoked — e.g. the user signed out of Aptoide
+     * services or the purchase was refunded.
+     */
+    fun processExpiredNonConsumablePurchases(purchases: List<Purchase>)
+
+    /**
      * Listener for Aptoide billing client state changes.
      *
      * This listener handles events related to the connection state
@@ -105,6 +116,7 @@ interface SdkManager {
                                 "AptoideBillingClientStateListener: Aptoide SDK Setup successful. Querying inventory."
                             )
                             _connectionState.value = true
+                            _accountSignedInState.value = isSignedIn()
                             setupRTDNListener()
                             queryPurchases()
                             queryActiveSubscriptions()
@@ -167,12 +179,7 @@ interface SdkManager {
                                     "\nisAutoRenewing: ${purchase.isAutoRenewing}"
                             )
 
-                            val product = purchase.products.first()
-                            if (isSubscriptionTypeProduct(product) || isNonConsumableProduct(product)) {
-                                validateAndAcknowledgePurchase(purchase)
-                            } else {
-                                validateAndConsumePurchase(purchase)
-                            }
+                            finalizePurchase(purchase)
                         }
                     } else {
                         CoroutineScope(Job()).launch {
@@ -278,6 +285,139 @@ interface SdkManager {
         }
     }
 
+    /**
+     * Whether the backend currently enables Aptoide account sign-in. Both new features are remotely
+     * toggled and default to off. `SERVICE_UNAVAILABLE` means the remote config is still loading, so
+     * we treat it as "not yet available". Must only be called once the SDK connection is set up.
+     */
+    fun isAccountSignInSupported(): Boolean =
+        _connectionState.value &&
+            billingClient.isFeatureSupported(FeatureType.ACCOUNT_SIGN_IN).responseCode == BillingResponseCode.OK
+
+    /**
+     * Whether the user is currently signed in to their Aptoide account (synchronous).
+     */
+    fun isSignedIn(): Boolean = billingClient.isSignedInToAptoideServices()
+
+    /**
+     * Launches the Aptoide account sign-in WebView. On `OK` the account-state listener
+     * ([onAccountStateChanged]) refreshes the settings UI and re-queries purchases, so there is
+     * nothing else to do here on success.
+     */
+    fun signIn(activity: Activity) {
+        billingClient.signInToAptoideServices(activity) { result ->
+            // The sign-in callback may arrive on a background thread → marshal to main.
+            CoroutineScope(Dispatchers.Main).launch {
+                when (result.responseCode) {
+                    BillingResponseCode.OK -> Unit // account-state listener handles refresh
+                    BillingResponseCode.USER_CANCELED -> Log.i(LOG_TAG, "Sign-in dismissed")
+                    BillingResponseCode.FEATURE_NOT_SUPPORTED -> Log.i(LOG_TAG, "Sign-in disabled by backend")
+                    BillingResponseCode.SERVICE_UNAVAILABLE -> Log.i(LOG_TAG, "Not ready yet — retry shortly")
+                    else -> Log.e(LOG_TAG, "Sign-in error: ${result.debugMessage}")
+                }
+            }
+        }
+    }
+
+    /**
+     * Signs the user out of their Aptoide account. This is asynchronous and has no result callback;
+     * the account-state listener ([onAccountStateChanged]) fires `SIGNED_OUT` and reconciles
+     * entitlements (e.g. revoking the account's `legendary_dice` rainbow skin).
+     */
+    fun signOut() {
+        billingClient.signOutFromAptoideServices()
+    }
+
+    /**
+     * Re-queries owned purchases for BOTH product types and reconciles entitlements (grant present /
+     * revoke absent). Both queries already grant owned products and revoke ones no longer returned:
+     * - INAPP via [queryPurchases] (acknowledges & grants `legendary_dice`, revokes if gone),
+     * - SUBS via [queryActiveSubscriptions] (grants `golden_dice`/`trial_dice`, revokes if gone).
+     */
+    fun refreshAllPurchases() {
+        queryPurchases()
+        queryActiveSubscriptions()
+    }
+
+    /**
+     * Handles an Aptoide account-state change (registered once on the builder via
+     * `setAccountStateListener`). Fires on every actual sign-in/out transition — including ones
+     * performed inside the payment WebView — so the app updates the signed-in state observed by the
+     * settings UI and reconciles entitlements without a restart.
+     *
+     * @param state one of [AptoideBillingClient.AccountState] (`SIGNED_IN` / `SIGNED_OUT`).
+     */
+    fun onAccountStateChanged(state: Int) {
+        // The account-state callback may arrive on a background thread → marshal to main.
+        CoroutineScope(Dispatchers.Main).launch {
+            _accountSignedInState.value = state == AptoideBillingClient.AccountState.SIGNED_IN
+            refreshAllPurchases()
+        }
+    }
+
+    /**
+     * Routes a purchase to the correct finalization flow:
+     * - Non-consumable INAPP products (e.g. `legendary_dice`) are **acknowledged** (kept owned).
+     * - Subscriptions keep their existing acknowledge flow, untouched.
+     * - Everything else is consumed as before.
+     */
+    private fun finalizePurchase(purchase: Purchase) {
+        val product = purchase.products.first()
+        when {
+            isNonConsumableProduct(product) -> acknowledge(purchase)
+            isSubscriptionTypeProduct(product) -> validateAndAcknowledgePurchase(purchase)
+            else -> validateAndConsumePurchase(purchase)
+        }
+    }
+
+    /**
+     * Finalizes a non-consumable purchase via [AptoideBillingClient.acknowledgeAsync] instead of
+     * consuming it, so it remains owned and keeps being returned by `queryPurchasesAsync`.
+     *
+     * A non-consumable that is neither consumed nor acknowledged is auto-refunded by Aptoide, so
+     * this must run after every successful non-consumable purchase (and on restore).
+     */
+    private fun acknowledge(purchase: Purchase, retryCount: Int = 0) {
+        val params = AcknowledgeParams.newBuilder()
+            .setPurchaseToken(purchase.purchaseToken)
+            .build()
+        billingClient.acknowledgeAsync(params) { result, _ ->
+            // SDK callbacks may arrive on a background thread → marshal to main before touching state.
+            CoroutineScope(Dispatchers.Main).launch {
+                when (result.responseCode) {
+                    BillingResponseCode.OK ->
+                        processSuccessfulPurchase(purchase) // finalized & still owned → unlock rainbow skin
+
+                    BillingResponseCode.SERVICE_UNAVAILABLE ->
+                        scheduleAcknowledgeRetry(purchase, retryCount) // config still loading → retry later
+
+                    BillingResponseCode.FEATURE_NOT_SUPPORTED ->
+                        Log.w(
+                            LOG_TAG,
+                            "Acknowledge not enabled by backend; cannot finalize non-consumable yet"
+                        )
+
+                    else ->
+                        Log.e(LOG_TAG, "Acknowledge failed: ${result.debugMessage}")
+                }
+            }
+        }
+    }
+
+    private fun scheduleAcknowledgeRetry(purchase: Purchase, previousRetryCount: Int) {
+        if (previousRetryCount >= MAX_ACKNOWLEDGE_RETRIES) {
+            Log.e(
+                LOG_TAG,
+                "Acknowledge still unavailable after $previousRetryCount retries; giving up for now."
+            )
+            return
+        }
+        CoroutineScope(Job()).launch {
+            delay(ACKNOWLEDGE_RETRY_DELAY_MS)
+            acknowledge(purchase, previousRetryCount + 1)
+        }
+    }
+
     private fun validateAndConsumePurchase(purchase: Purchase, skipValidation: Boolean = true) {
         CoroutineScope(Job()).launch {
             val product = purchase.products.first()
@@ -334,8 +474,12 @@ interface SdkManager {
             if (billingResult.responseCode == BillingResponseCode.OK) {
                 for (purchase in purchases) {
                     _purchases.add(purchase)
-                    validateAndConsumePurchase(purchase)
+                    // Owned non-consumables (e.g. legendary_dice) are acknowledged & granted here,
+                    // consumables are consumed — both handled by finalizePurchase.
+                    finalizePurchase(purchase)
                 }
+                // Revoke any previously owned non-consumable that is no longer returned.
+                processExpiredNonConsumablePurchases(purchases)
             }
         }
     }
@@ -464,8 +608,7 @@ interface SdkManager {
     }
 
     private fun isNonConsumableProduct(product: String?): Boolean {
-        val nonConsumableProducts = listOf("non_consumable_attempts")
-        return nonConsumableProducts.contains(product)
+        return product in Skus.NON_CONSUMABLE_SKUS
     }
 
     private fun isFreeTrialSubscription(productDetails: ProductDetails): Boolean {
@@ -488,5 +631,8 @@ interface SdkManager {
 
     companion object {
         const val LOG_TAG = "SdkManager"
+
+        private const val MAX_ACKNOWLEDGE_RETRIES = 3
+        private const val ACKNOWLEDGE_RETRY_DELAY_MS = 5_000L
     }
 }

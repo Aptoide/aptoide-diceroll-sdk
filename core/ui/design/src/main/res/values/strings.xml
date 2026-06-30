@@ -44,6 +44,9 @@
     <string name="payment_item_non_consumable_attempts_error_message_user_cancelled">Purchase for Non-Consumable Attempts was cancelled.</string>
     <string name="payment_item_non_consumable_attempts_refund_message">Your Purchase for Non-Consumable Attempts was Refunded.</string>
     <string name="payment_item_non_consumable_attempts_success_message">You have received 10 non-consumable attempts.</string>
+    <string name="payment_item_legendary_dice_error_message_user_cancelled">Purchase for Legendary Dice was cancelled.</string>
+    <string name="payment_item_legendary_dice_refund_message">Your Purchase for the Legendary Dice was Refunded.</string>
+    <string name="payment_item_legendary_dice_success_message">You have unlocked the Rainbow Dice skin!</string>
     <string name="payment_item_golden_dice_error_message_user_cancelled">Purchase for Golden Dice was cancelled.</string>
     <string name="payment_item_golden_dice_refund_message">Your Subscription for the Golden Dice was Refunded.</string>
     <string name="payment_item_golden_dice_success_message">You are now subscribed to the Golden Dice.</string>
@@ -69,4 +72,7 @@
     <string name="settings_title_app_information">App Information</string>
     <string name="settings_title_statistics">Statistics</string>
     <string name="settings_title_privacy_policy">Privacy Policy</string>
+    <string name="settings_title_aptoide">Aptoide</string>
+    <string name="settings_aptoide_sign_in">Sign in to Aptoide Services</string>
+    <string name="settings_aptoide_logout">Logout from Aptoide Services</string>
 </resources>

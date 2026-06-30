@@ -55,6 +55,8 @@ interface SdkManager {
 
     val _connectionState: MutableStateFlow<Boolean>
 
+    val _accountSignedInState: MutableStateFlow<Boolean>
+
     val _attemptsPrice: MutableStateFlow<String?>
 
     val _purchasableItems: MutableList<InternalSkuDetails>
@@ -84,6 +86,13 @@ interface SdkManager {
      * Process the expired Subscriptions
      */
     fun processExpiredPurchases(purchases: List<Purchase>)
+
+    /**
+     * Process non-consumable INAPP purchases that are no longer owned (not returned by the INAPP
+     * purchases query) so their entitlement can be revoked — e.g. the purchase was refunded or
+     * voided on the Google account.
+     */
+    fun processExpiredNonConsumablePurchases(purchases: List<Purchase>)
 
     /**
      * Listener for Google Billing Client state changes.
@@ -166,12 +175,7 @@ interface SdkManager {
                                     "\nisAutoRenewing: ${purchase.isAutoRenewing}"
                             )
 
-                            val product = purchase.products.first()
-                            if (isSubscriptionTypeProduct(product) || isNonConsumableProduct(product)) {
-                                validateAndAcknowledgePurchase(purchase)
-                            } else {
-                                validateAndConsumePurchase(purchase)
-                            }
+                            finalizePurchase(purchase)
                         }
                     } else {
                         CoroutineScope(Job()).launch {
@@ -295,6 +299,59 @@ interface SdkManager {
         //cab.launchAppUpdateDialog(context)
     }
 
+    /**
+     * Account sign-in via a hosted WebView is an Aptoide-only feature. On Google Play purchases are
+     * already tied to the device's signed-in Google account, so there is no separate sign-in step.
+     */
+    fun isAccountSignInSupported(): Boolean = false
+
+    /**
+     * On Google Play the user is always implicitly signed in via the device's Google account, so
+     * there is no separate Aptoide session to expose. The "Aptoide" settings block is hidden anyway
+     * (see [isAccountSignInSupported]).
+     */
+    fun isSignedIn(): Boolean = false
+
+    /**
+     * No Aptoide sign-in flow exists on Google Play; re-query owned purchases so the behaviour is
+     * still useful if ever invoked.
+     */
+    fun signIn(activity: Activity) {
+        refreshAllPurchases()
+    }
+
+    /**
+     * Signing out of the device's Google account is not something the app can do; no-op on Google Play.
+     */
+    fun signOut() {
+        // Not supported on Google Play.
+    }
+
+    /**
+     * Re-queries owned purchases for both product types and reconciles entitlements (grant present /
+     * revoke absent) — INAPP via [queryPurchases] and SUBS via [queryActiveSubscriptions].
+     */
+    fun refreshAllPurchases() {
+        queryPurchases()
+        queryActiveSubscriptions()
+    }
+
+    /**
+     * Routes a purchase to the correct finalization flow following Google Play Billing semantics:
+     * - Non-consumable one-time products (e.g. `legendary_dice`) are **acknowledged** so they stay
+     *   owned and keep being returned by `queryPurchasesAsync`.
+     * - Subscriptions are **acknowledged** as well (Google requires acknowledgment to avoid refund).
+     * - Genuinely consumable products are **consumed** so they can be repurchased.
+     */
+    private fun finalizePurchase(purchase: Purchase) {
+        val product = purchase.products.first()
+        when {
+            isNonConsumableProduct(product) -> validateAndAcknowledgePurchase(purchase)
+            isSubscriptionTypeProduct(product) -> validateAndAcknowledgePurchase(purchase)
+            else -> validateAndConsumePurchase(purchase)
+        }
+    }
+
     private fun validateAndConsumePurchase(purchase: Purchase, skipValidation: Boolean = false) {
         CoroutineScope(Job()).launch {
             val product = purchase.products.first()
@@ -351,8 +408,12 @@ interface SdkManager {
             if (billingResult.responseCode == BillingResponseCode.OK) {
                 for (purchase in purchases) {
                     _purchases.add(purchase)
-                    validateAndConsumePurchase(purchase)
+                    // Owned non-consumables (e.g. legendary_dice) are acknowledged & granted,
+                    // consumables are consumed — both handled by finalizePurchase.
+                    finalizePurchase(purchase)
                 }
+                // Revoke any previously owned non-consumable that is no longer returned.
+                processExpiredNonConsumablePurchases(purchases)
             }
         }
     }
@@ -478,7 +539,7 @@ interface SdkManager {
     }
 
     private fun isNonConsumableProduct(product: String?): Boolean {
-        val nonConsumableProducts = listOf("non_consumable_attempts")
+        val nonConsumableProducts = listOf("non_consumable_attempts") + Skus.NON_CONSUMABLE_SKUS
         return nonConsumableProducts.contains(product)
     }
 
